@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Access-ACE-MCP</AssemblyName>
+    <RootNamespace>AccessAceMcp</RootNamespace>
+    <Deterministic>true</Deterministic>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Prerelease package: run dotnet add package ModelContextProtocol -prerelease to update version -->
+    <PackageReference Include="ModelContextProtocol" Version="0.*" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Access-ACE-MCP-Tests-Net10</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <Target Name="BuildAccessAceAgentForPublish" BeforeTargets="Publish">
+    <MSBuild Projects="..\Access_ACE_Agent\Access-ACE-Agent.csproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=AnyCPU" />
+  </Target>
+
+  <Target Name="CopyAccessAceAgentToPublish" AfterTargets="Publish" DependsOnTargets="BuildAccessAceAgentForPublish">
+    <ItemGroup>
+      <AccessAceAgentPublishFiles Include="..\Access_ACE_Agent\bin\$(Configuration)\**\*" Exclude="..\Access_ACE_Agent\bin\$(Configuration)\**\*.vshost.*" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(AccessAceAgentPublishFiles)" DestinationFiles="@(AccessAceAgentPublishFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>
