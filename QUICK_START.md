@@ -45,16 +45,16 @@ That's it! Claude will handle the connection and return the results.
 ## Common Tasks (One-Liners)
 
 **List database contents:**
-> "List all forms, reports, and queries in C:\Users\DJ\MyDB.accdb"
+> "List all forms, reports, and queries in C:\Users\<UserName>\MyDB.accdb"
 
 **Export a form for review:**
-> "Export the 'MyForm' from C:\Users\DJ\MyDB.accdb so I can review its definition"
+> "Export the 'MyForm' from C:\Users\<UserName>\MyDB.accdb so I can review its definition"
 
 **Modify a form control:**
-> "In C:\Users\DJ\MyDB.accdb, change the label text of control 'Label1' on form 'MyForm' to 'New Text'"
+> "In C:\Users\<UserName>\MyDB.accdb, change the label text of control 'Label1' on form 'MyForm' to 'New Text'"
 
 **Export VBA code:**
-> "Export the VBA code from the 'Utilities' module in C:\Users\DJ\MyDB.accdb"
+> "Export the VBA code from the 'Utilities' module in C:\Users\<UserName>\MyDB.accdb"
 
 **Add a VBA procedure:**
 > "Add a procedure called 'HelloWorld' to the 'Utilities' module that prints 'Hello World'"

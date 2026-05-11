@@ -1,4 +1,10 @@
 <Solution>
+  <Folder Name="/MDFiles/">
+    <File Path="ARCHITECTURE.md" />
+    <File Path="MCP_SETUP_GUIDE.md" />
+    <File Path="QUICK_START.md" />
+    <File Path="README.md" />
+  </Folder>
   <Project Path="Access-ACE-MCP-Tests-Net10/Access-ACE-MCP-Tests-Net10.csproj" Id="b2c3d4e5-f6a7-8901-bcde-f23456789012" />
   <Project Path="Access-ACE-MCP-Tests/Access-ACE-MCP-Tests.csproj" Id="54ec37d3-d298-43dd-8584-625ea2cd617f" />
   <Project Path="Access-ACE-MCP/Access-ACE-MCP.csproj" Id="a1f2c3d4-e5f6-7890-abcd-ef1234567890" />

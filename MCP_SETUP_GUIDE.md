@@ -148,7 +148,7 @@ You don't need to pre-configure the server. In any Claude conversation, you can 
 
 ### Example 1: Connect to a Database and List Forms
 
-**Your task:** "Connect to my database at C:\Users\DJ\MyDatabase.accdb and list all forms."
+**Your task:** "Connect to my database at C:\Users\<UserName>\MyDatabase.accdb and list all forms."
 
 **What Claude will do:**
 1. Call `connect_access` with the database path
@@ -161,7 +161,7 @@ You don't need to pre-configure the server. In any Claude conversation, you can 
 
 ### Example 2: Modify a Form Control
 
-**Your task:** "In my database at C:\Users\DJ\MyDatabase.accdb, find the 'UserForm' and change the caption of the 'SubmitButton' to 'Save Changes'."
+**Your task:** "In my database at C:\Users\<UserName>\MyDatabase.accdb, find the 'UserForm' and change the caption of the 'SubmitButton' to 'Save Changes'."
 
 **What Claude will do:**
 1. Connect to the database (if not already connected)
@@ -211,7 +211,7 @@ You don't need to pre-configure the server. In any Claude conversation, you can 
 
 If you're already connected to one database and want to switch to another:
 
-1. **Ask Claude:** "Disconnect from the current database and connect to C:\Users\DJ\OtherDatabase.accdb"
+1. **Ask Claude:** "Disconnect from the current database and connect to C:\Users\<UserName>\OtherDatabase.accdb"
 
 2. **Claude will:**
    - Call `disconnect_access` to close the current connection
@@ -222,7 +222,7 @@ If you're already connected to one database and want to switch to another:
 
 Simply provide the database path in your first request:
 
-"In C:\Users\DJ\MyDatabase.accdb, list all the reports."
+"In C:\Users\<UserName>\MyDatabase.accdb, list all the reports."
 
 Claude will automatically connect using that path.
 
@@ -324,7 +324,7 @@ The Access-ACE-MCP server exposes the following tools to Claude:
 **Solution:**
 1. Double-check the exact file path
 2. Verify the file exists at that location
-3. Use absolute paths (e.g., `C:\Users\DJ\MyDatabase.accdb`)
+3. Use absolute paths (e.g., `C:\Users\<UserName>\MyDatabase.accdb`)
 4. Ensure the file has read/write permissions
 
 ### Database becomes corrupted or locked

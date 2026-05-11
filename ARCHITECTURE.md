@@ -89,7 +89,7 @@ Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 wo
 {
   "jsonrpc": "2.0",
   "method": "connect_access",
-  "params": { "database_path": "C:\\Users\\DJ\\MyDB.accdb" },
+  "params": { "database_path": "C:\\Users\\<UserName>\\MyDB.accdb" },
   "id": 1
 }
 ```
@@ -113,9 +113,9 @@ Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 wo
 
 ```
 User Request:
-"List all forms in C:\Users\DJ\MyDB.accdb"
+"List all forms in C:\Users\<UserName>\MyDB.accdb"
         ↓
-Claude Client calls connect_access("C:\Users\DJ\MyDB.accdb")
+Claude Client calls connect_access("C:\Users\<UserName>\MyDB.accdb")
         ↓
 MCP Server receives JSON-RPC call on stdio
         ↓
