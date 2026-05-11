@@ -188,11 +188,11 @@ See [MCP_SETUP_GUIDE.md](MCP_SETUP_GUIDE.md#available-tools) for complete tool d
 
 ### "64-bit Microsoft Access is installed but is not supported"
 
-**Solution:** Install 32-bit Office/Access. If you have 64-bit Office, you can install 32-bit alongside it.
+**Solution:** Install 32-bit Office/Access. 
 
 ```bash
 # Check your Access version
-# File > Account > Look for "32-bit" or "64-bit"
+# File > Account > About Access button Look for "32-bit" or "64-bit"
 ```
 
 ### "Access-ACE-Agent.exe not found"
