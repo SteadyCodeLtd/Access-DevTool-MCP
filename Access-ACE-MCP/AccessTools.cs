@@ -305,4 +305,33 @@ internal sealed class AccessTools(PipeChannel channel)
     public Task<string> DeleteReport(
         [Description("Report name")] string report_name)
         => channel.CallAsync("delete_report", new { report_name });
+
+    // ── New Interop Features ──────────────────────────────────────────────────────
+
+    [McpServerTool(Name = "get_table_definitions")]
+    [Description("Get detailed definitions of all tables with field information (Interop feature)")]
+    public Task<string> GetTableDefinitions()
+        => channel.CallAsync("get_table_definitions");
+
+    [McpServerTool(Name = "get_table_definition")]
+    [Description("Get detailed definition of a specific table with field information (Interop feature)")]
+    public Task<string> GetTableDefinition(
+        [Description("Table name")] string table_name)
+        => channel.CallAsync("get_table_definition", new { table_name });
+
+    [McpServerTool(Name = "get_objects_by_type")]
+    [Description("Get objects filtered by type using enum-based type selection (Interop feature)")]
+    public Task<string> GetObjectsByType(
+        [Description("Object type enum: acTable (0), acQuery (1), acForm (2), acReport (3), acMacro (4), acModule (5)")] int object_type)
+        => channel.CallAsync("get_objects_by_type", new { object_type });
+
+    [McpServerTool(Name = "compile_vba_with_errors")]
+    [Description("Compile VBA and return detailed error information (Interop feature)")]
+    public Task<string> CompileVbaWithErrors()
+        => channel.CallAsync("compile_vba_with_errors");
+
+    [McpServerTool(Name = "get_database_summary")]
+    [Description("Get summary of all database objects (tables, forms, reports, queries, modules, macros) (Interop feature)")]
+    public Task<string> GetDatabaseObjectsSummary()
+        => channel.CallAsync("get_database_summary");
 }

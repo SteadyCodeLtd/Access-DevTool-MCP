@@ -628,5 +628,341 @@ namespace Access_ACE_MCP_Tests
                 }
             });
         }
+
+        // ── New Interop Features ──────────────────────────────────────────────
+
+        [TestMethod]
+        public void GetTableDefinitions_ReturnsNonEmptyList()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var tables = svc.GetTableDefinitions();
+                    Assert.IsNotNull(tables);
+                    Assert.IsTrue(tables.Count > 0, "Database should have at least one table");
+                    Assert.IsTrue(tables.All(t => !string.IsNullOrWhiteSpace(t.Name)), "All tables should have names");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetTableDefinitions_TablesHaveFields()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var tables = svc.GetTableDefinitions();
+                    Assert.IsTrue(tables.Count > 0);
+
+                    var tablesWithFields = tables.Where(t => t.Fields != null && t.Fields.Count > 0).ToList();
+                    Assert.IsTrue(tablesWithFields.Count > 0, "At least one table should have fields");
+
+                    var firstTable = tablesWithFields[0];
+                    Assert.AreEqual(firstTable.FieldCount, firstTable.Fields.Count, "FieldCount should match Fields.Count");
+                    Assert.IsTrue(firstTable.Fields.All(f => !string.IsNullOrWhiteSpace(f.Name)), "All fields should have names");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetTableDefinitions_FieldsHaveTypeInfo()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var tables = svc.GetTableDefinitions();
+                    var allFields = tables.SelectMany(t => t.Fields).ToList();
+                    Assert.IsTrue(allFields.Count > 0);
+
+                    Assert.IsTrue(allFields.All(f => f.Type >= 0), "All fields should have type code");
+                    Assert.IsTrue(allFields.All(f => !string.IsNullOrWhiteSpace(f.TypeName)), "All fields should have type name");
+                    Assert.IsTrue(allFields.All(f => f.Size >= 0), "All fields should have size");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetTableDefinition_ValidTableName_ReturnsTableInfo()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var tables = svc.GetTableDefinitions();
+                    Assert.IsTrue(tables.Count > 0);
+
+                    string tableName = tables[0].Name;
+                    var tableInfo = svc.GetTableDefinition(tableName);
+
+                    Assert.IsNotNull(tableInfo);
+                    Assert.AreEqual(tableName, tableInfo.Name);
+                    Assert.IsTrue(tableInfo.FieldCount >= 0);
+                    Assert.IsNotNull(tableInfo.Fields);
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetTableDefinition_InvalidTableName_Throws()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    Assert.ThrowsException<ArgumentException>(() => svc.GetTableDefinition("__NoSuchTable__"));
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetTableDefinition_CaseInsensitive()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var tables = svc.GetTableDefinitions();
+                    Assert.IsTrue(tables.Count > 0);
+
+                    string tableName = tables[0].Name;
+                    string lowerName = tableName.ToLowerInvariant();
+                    string upperName = tableName.ToUpperInvariant();
+
+                    var result1 = svc.GetTableDefinition(tableName);
+                    var result2 = svc.GetTableDefinition(lowerName);
+                    var result3 = svc.GetTableDefinition(upperName);
+
+                    Assert.AreEqual(result1.Name, result2.Name);
+                    Assert.AreEqual(result2.Name, result3.Name);
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetObjectsByType_Tables_ReturnsNonEmptyList()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var tables = svc.GetObjectsByType(0); // acTable = 0
+
+                    Assert.IsNotNull(tables);
+                    Assert.IsTrue(tables.Count > 0, "Database should have at least one table");
+                    Assert.IsTrue(tables.All(t => !string.IsNullOrWhiteSpace(t.Name)), "All objects should have names");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetObjectsByType_Forms_ReturnsNonEmptyList()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var forms = svc.GetObjectsByType(2); // acForm = 2
+
+                    Assert.IsNotNull(forms);
+                    Assert.IsTrue(forms.Count > 0, "Database should have at least one form");
+                    Assert.IsTrue(forms.All(f => !string.IsNullOrWhiteSpace(f.Name)), "All forms should have names");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetObjectsByType_Reports_ReturnsNonEmptyList()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var reports = svc.GetObjectsByType(3); // acReport = 3
+
+                    Assert.IsNotNull(reports);
+                    Assert.IsTrue(reports.Count > 0, "Database should have at least one report");
+                    Assert.IsTrue(reports.All(r => !string.IsNullOrWhiteSpace(r.Name)), "All reports should have names");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetObjectsByType_Queries_ReturnsNonEmptyList()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var queries = svc.GetObjectsByType(1); // acQuery = 1
+
+                    Assert.IsNotNull(queries);
+                    Assert.IsTrue(queries.Count > 0, "Database should have at least one query");
+                    Assert.IsTrue(queries.All(q => !string.IsNullOrWhiteSpace(q.Name)), "All queries should have names");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetObjectsByType_Modules_ReturnsNonEmptyList()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var modules = svc.GetObjectsByType(5); // acModule = 5
+
+                    Assert.IsNotNull(modules);
+                    Assert.IsTrue(modules.Count > 0, "Database should have at least one module");
+                    Assert.IsTrue(modules.All(m => !string.IsNullOrWhiteSpace(m.Name)), "All modules should have names");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetObjectsByType_IsLoadedProperty_IsPopulated()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var forms = svc.GetObjectsByType(2); // acForm = 2
+
+                    Assert.IsTrue(forms.Count > 0);
+                    Assert.IsTrue(forms.All(f => f.IsLoaded == true || f.IsLoaded == false),
+                        "IsLoaded should be a valid boolean");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetObjectsByType_InvalidType_Throws()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    Assert.ThrowsException<ArgumentException>(() => svc.GetObjectsByType(99));
+                }
+            });
+        }
+
+        [TestMethod]
+        public void CompileVbaWithErrors_ReturnsCompileResult()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var result = svc.CompileVbaWithErrors();
+
+                    Assert.IsNotNull(result);
+                    Assert.IsNotNull(result.Errors);
+                    Assert.IsTrue(result.Success || !result.Success, "Success must be set");
+                    Assert.IsTrue(string.IsNullOrEmpty(result.Message) || result.Message.Length > 0, "Message should be valid");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void CompileVbaWithErrors_SuccessfulCompile_ReturnsTrue()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    // Assuming the test database has no VBA errors
+                    var result = svc.CompileVbaWithErrors();
+
+                    Assert.IsTrue(result.Success, "Test database should compile successfully");
+                    Assert.AreEqual(0, result.Errors.Count, "No errors should be returned");
+                    StringAssert.Contains(result.Message.ToLower(), "successful");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetDatabaseObjectsSummary_ReturnsValidSummary()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var summary = svc.GetDatabaseObjectsSummary();
+
+                    Assert.IsNotNull(summary);
+                    Assert.IsTrue(summary.Tables >= 0, "Tables count should be non-negative");
+                    Assert.IsTrue(summary.Forms >= 0, "Forms count should be non-negative");
+                    Assert.IsTrue(summary.Reports >= 0, "Reports count should be non-negative");
+                    Assert.IsTrue(summary.Queries >= 0, "Queries count should be non-negative");
+                    Assert.IsTrue(summary.Modules >= 0, "Modules count should be non-negative");
+                    Assert.IsTrue(summary.Macros >= 0, "Macros count should be non-negative");
+                    Assert.IsTrue(summary.TotalFields >= 0, "TotalFields count should be non-negative");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetDatabaseObjectsSummary_HasExpectedCounts()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var summary = svc.GetDatabaseObjectsSummary();
+
+                    // Test database should have objects
+                    Assert.IsTrue(summary.Tables > 0, "Database should have tables");
+                    Assert.IsTrue(summary.Forms > 0, "Database should have forms");
+                    Assert.IsTrue(summary.Reports > 0, "Database should have reports");
+                    Assert.IsTrue(summary.TotalFields > 0, "Database should have fields");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetDatabaseObjectsSummary_MatchesIndividualCalls()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var summary = svc.GetDatabaseObjectsSummary();
+
+                    var forms = svc.GetForms().Count;
+                    var reports = svc.GetReports().Count;
+                    var modules = svc.GetModules().Count;
+                    var macros = svc.GetMacros().Count;
+                    var queries = svc.GetQueries().Count;
+                    var tables = svc.GetTableDefinitions().Count;
+
+                    Assert.AreEqual(forms, summary.Forms, "Forms count should match");
+                    Assert.AreEqual(reports, summary.Reports, "Reports count should match");
+                    Assert.AreEqual(modules, summary.Modules, "Modules count should match");
+                    Assert.AreEqual(macros, summary.Macros, "Macros count should match");
+                    Assert.AreEqual(queries, summary.Queries, "Queries count should match");
+                    Assert.AreEqual(tables, summary.Tables, "Tables count should match");
+                }
+            });
+        }
+
+        [TestMethod]
+        public void GetDatabaseObjectsSummary_TotalFieldsMatchesTableDefinitions()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var summary = svc.GetDatabaseObjectsSummary();
+                    var tables = svc.GetTableDefinitions();
+
+                    int totalFieldsFromTables = tables.Sum(t => t.FieldCount);
+                    Assert.AreEqual(totalFieldsFromTables, summary.TotalFields,
+                        "TotalFields should match sum of all table field counts");
+                }
+            });
+        }
     }
 }

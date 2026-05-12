@@ -114,6 +114,38 @@ Add the database path to the `args` array:
 copy "C:\Users\YourName\MyDatabase.accdb" "C:\Users\YourName\MyDatabase_backup_2026-05-09.accdb"
 ```
 
+### Important Usage Notes
+
+#### Who Should Use This Tool
+
+**Access-ACE-MCP is intended for developers and power users who need to modify Access applications**, not for end users. This tool provides full programmatic access to database structure, code, and design. Use it only if you understand database design and are comfortable modifying VBA code and database objects.
+
+#### Getting Started Checklist
+
+1. **Close Access before connecting** - Make sure Microsoft Access is completely closed before you ask Claude to connect to your database
+2. **Ask Claude to disconnect when finished** - Always request Claude to disconnect from the database when your work is complete
+3. **Keep Access visible** - Once connected, Access may display dialog boxes during automation. Keep the Access window visible and be ready to click appropriate buttons if needed
+4. **Understand the lockfile** - While connected, Access creates a lockfile (`.ldb` or `.laccdb`) that prevents other connections from saving changes. Disconnecting removes this lockfile and allows normal Access usage
+
+#### Connection Behavior
+
+- **One connection at a time** - The MCP server maintains one connection per database
+- **Lockfile prevents concurrent saves** - While connected via the MCP server, other Access instances cannot save changes to the same database
+- **Dialog boxes require interaction** - Some Access operations may display dialog boxes. You need to interact with these dialogs by clicking buttons in the Access window
+
+#### Disconnection Important
+
+Always disconnect when finished:
+```
+User: "Please disconnect from the database"
+```
+
+Disconnecting:
+- Closes the Access connection
+- Removes the lockfile
+- Allows other Access instances to save changes normally
+- Prevents accidental modifications
+
 ### Basic Examples
 
 #### 1. List All Forms

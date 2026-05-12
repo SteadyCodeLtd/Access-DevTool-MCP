@@ -510,6 +510,182 @@ namespace Access_ACE_MCP
         public void DeleteReport(string reportName) =>
             DeleteObject(3, reportName); // 3 = acReport
 
+        // ── New Interop-Enabled Features ────────────────────────────────────────
+
+        public List<TableDefinitionInfo> GetTableDefinitions()
+        {
+            var app = EnsureApp();
+            var list = new List<TableDefinitionInfo>();
+
+            try
+            {
+                dynamic db = app.CurrentDb();
+                dynamic tableDefs = db.TableDefs;
+                int count = (int)tableDefs.Count;
+
+                for (int i = 0; i < count; i++)
+                {
+                    try
+                    {
+                        dynamic tdf = tableDefs.Item(i);
+                        string tName = (string)tdf.Name;
+                        if (tName.StartsWith("MSys")) continue;
+
+                        var fieldList = new List<FieldDefinitionInfo>();
+                        dynamic fields = tdf.Fields;
+                        int fieldCount = (int)fields.Count;
+
+                        for (int j = 0; j < fieldCount; j++)
+                        {
+                            try
+                            {
+                                dynamic fld = fields.Item(j);
+                                fieldList.Add(new FieldDefinitionInfo
+                                {
+                                    Name = (string)fld.Name,
+                                    Type = (int)fld.Type,
+                                    TypeName = GetFieldTypeName((int)fld.Type),
+                                    Size = (int)fld.Size,
+                                    Required = (bool)fld.Required,
+                                    AllowZeroLength = (bool)fld.AllowZeroLength
+                                });
+                            }
+                            catch { }
+                        }
+
+                        list.Add(new TableDefinitionInfo
+                        {
+                            Name = tName,
+                            FieldCount = fieldCount,
+                            Fields = fieldList
+                        });
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+
+            return list;
+        }
+
+        public TableDefinitionInfo GetTableDefinition(string tableName)
+        {
+            var tables = GetTableDefinitions();
+            return tables.FirstOrDefault(t => string.Equals(t.Name, tableName, StringComparison.OrdinalIgnoreCase))
+                ?? throw new ArgumentException($"Table '{tableName}' not found.");
+        }
+
+        public List<AccessObjectInfo> GetObjectsByType(int objectType)
+        {
+            var app = EnsureApp();
+            var list = new List<AccessObjectInfo>();
+
+            try
+            {
+                dynamic objects = null;
+                switch (objectType)
+                {
+                    case 0: objects = app.CurrentProject.AllTables; break;      // acTable
+                    case 1: objects = app.CurrentProject.AllQueries; break;     // acQuery
+                    case 2: objects = app.CurrentProject.AllForms; break;       // acForm
+                    case 3: objects = app.CurrentProject.AllReports; break;     // acReport
+                    case 4: objects = app.CurrentProject.AllMacros; break;      // acMacro
+                    case 5: objects = app.CurrentProject.AllModules; break;     // acModule
+                    default: throw new ArgumentException($"Unsupported object type: {objectType}");
+                }
+
+                for (int i = 0; i < (int)objects.Count; i++)
+                {
+                    try
+                    {
+                        dynamic obj = objects.Item(i);
+                        list.Add(new AccessObjectInfo { Name = (string)obj.Name, IsLoaded = (bool)obj.IsLoaded });
+                    }
+                    catch { }
+                }
+            }
+            catch (ArgumentException) { throw; }
+            catch { }
+
+            return list;
+        }
+
+        public CompileResultInfo CompileVbaWithErrors()
+        {
+            var app = EnsureApp();
+            var result = new CompileResultInfo { Success = false, Errors = new List<string>() };
+
+            try
+            {
+                try
+                {
+                    dynamic vbe = app.VBE;
+                    app.DoCmd.RunCommand(584); // acCmdCompileAllModules
+                    result.Success = true;
+                    result.Message = "Compilation successful";
+                }
+                catch (Exception comEx)
+                {
+                    result.Success = false;
+                    result.Message = comEx.Message;
+                    result.Errors.Add($"Compilation Error: {comEx.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Success = false;
+                result.Message = ex.Message;
+                result.Errors.Add(UnwrapMessage(ex));
+            }
+
+            return result;
+        }
+
+        public DatabaseObjectsSummary GetDatabaseObjectsSummary()
+        {
+            var app = EnsureApp();
+            var summary = new DatabaseObjectsSummary();
+
+            try
+            {
+                summary.Forms = GetForms().Count;
+                summary.Reports = GetReports().Count;
+                summary.Modules = GetModules().Count;
+                summary.Macros = GetMacros().Count;
+                summary.Queries = GetQueries().Count;
+
+                var tables = GetTableDefinitions();
+                summary.Tables = tables.Count;
+                summary.TotalFields = tables.Sum(t => t.FieldCount);
+            }
+            catch { }
+
+            return summary;
+        }
+
+        private static string GetFieldTypeName(int typeCode)
+        {
+            switch (typeCode)
+            {
+                case 1: return "Boolean";
+                case 2: return "Byte";
+                case 3: return "Integer";
+                case 4: return "Long";
+                case 5: return "Currency";
+                case 6: return "Single";
+                case 7: return "Double";
+                case 8: return "Date/Time";
+                case 9: return "Binary";
+                case 10: return "Text";
+                case 11: return "Long Binary";
+                case 12: return "Memo";
+                case 15: return "GUID";
+                case 16: return "Numeric";
+                case 17: return "Decimal";
+                default: return $"Unknown({typeCode})";
+            }
+        }
+
         // ── Helpers ───────────────────────────────────────────────────────────
 
         private void ImportObjectFromTextExclusive(int objectType, string objectName, string objectData)
@@ -883,5 +1059,40 @@ namespace Access_ACE_MCP
         public int?   Height          { get; set; }
         public bool?  Visible         { get; set; }
         public bool?  Enabled         { get; set; }
+    }
+
+    public class FieldDefinitionInfo
+    {
+        public string Name { get; set; }
+        public int Type { get; set; }
+        public string TypeName { get; set; }
+        public int Size { get; set; }
+        public bool Required { get; set; }
+        public bool AllowZeroLength { get; set; }
+    }
+
+    public class TableDefinitionInfo
+    {
+        public string Name { get; set; }
+        public int FieldCount { get; set; }
+        public List<FieldDefinitionInfo> Fields { get; set; }
+    }
+
+    public class CompileResultInfo
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; }
+        public List<string> Errors { get; set; }
+    }
+
+    public class DatabaseObjectsSummary
+    {
+        public int Tables { get; set; }
+        public int Forms { get; set; }
+        public int Reports { get; set; }
+        public int Queries { get; set; }
+        public int Modules { get; set; }
+        public int Macros { get; set; }
+        public int TotalFields { get; set; }
     }
 }
