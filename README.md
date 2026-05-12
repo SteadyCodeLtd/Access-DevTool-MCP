@@ -4,7 +4,7 @@
 [![.NET Version](https://img.shields.io/badge/.NET-10.0-blue)](https://dotnet.microsoft.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2032--bit-blue)](https://www.microsoft.com/)
 
-**Access-ACE-MCP** is a Model Context Protocol (MCP) server that enables Claude AI to interact with Microsoft Access databases through COM automation. Automate database management, modify forms and reports, execute VBA code, and manage database objects programmatically.
+**Access-ACE-MCP** is a Model Context Protocol (MCP) server that enables Claude AI to interact with Microsoft Access databases through COM Interop automation. Automate database management, modify forms and reports, execute VBA code, and manage database objects programmatically.
 
 ## Features
 
@@ -273,8 +273,8 @@ Access-ACE-MCP uses a two-process architecture:
 ```
 Claude → Access-ACE-MCP.exe (.NET 10) 
          ↓ (Named Pipe IPC)
-         Access-ACE-Agent.exe (.NET 4.8 COM Worker)
-         ↓ (COM Automation)
+         Access-ACE-Agent.exe (.NET 4.8 COM Interop Worker)
+         ↓ (Access COM Interop)
          Microsoft Access
 ```
 

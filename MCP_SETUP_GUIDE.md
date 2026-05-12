@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Access-ACE-MCP** is a Model Context Protocol (MCP) server that enables Claude to interact with Microsoft Access databases (.accdb and .mdb files) through automated COM automation. This allows Claude to read, modify, and manage Access database objects including tables, queries, forms, reports, modules, and VBA code.
+**Access-ACE-MCP** is a Model Context Protocol (MCP) server that enables Claude to interact with Microsoft Access databases (.accdb and .mdb files) through COM Interop automation. This allows Claude to read, modify, and manage Access database objects including tables, queries, forms, reports, modules, and VBA code.
 
 The server provides comprehensive access to Access's object model, allowing you to:
 - Connect to and manage Access databases

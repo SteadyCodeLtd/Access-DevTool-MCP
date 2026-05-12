@@ -25,19 +25,19 @@ Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 wo
 │            (IPC: access-ace-{ProcessID})                    │
 │                        ↓                                      │
 │ ┌────────────────────────────────────────────────────────┐  │
-│ │ Access-ACE-Agent.exe (.NET 4.8, x86 COM worker)      │  │
+│ │ Access-ACE-Agent.exe (.NET 4.8, x86 COM Interop)     │  │
 │ │ ┌──────────────────────────────────────────────────┐  │  │
 │ │ │ - COM Interop (Microsoft.Office.Interop.Access)│  │  │
 │ │ │ - Database connection management                 │  │  │
-│ │ │ - VBA manipulation via DAO/ADO/COM             │  │  │
+│ │ │ - VBA manipulation via DAO/ADO/COM Interop     │  │  │
 │ │ │ - SaveAsText / LoadFromText operations          │  │  │
 │ │ │ - Error handling & JSON serialization           │  │  │
 │ │ └──────────────────────────────────────────────────┘  │  │
 │ │                     ↓                                   │  │
-│ │            COM Automation (DCOM)                       │  │
+│ │         Access COM Interop (DCOM)                      │  │
 │ │                     ↓                                   │  │
 │ │         ┌──────────────────────┐                       │  │
-│ │         │ Microsoft Access COM │                       │  │
+│ │         │ Microsoft Access     │                       │  │
 │ │         │ (.accdb / .mdb)      │                       │  │
 │ │         └──────────────────────┘                       │  │
 │ └────────────────────────────────────────────────────────┘  │
@@ -63,10 +63,10 @@ Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 wo
 - Routes tool calls to the worker process via named pipes
 - Handles application lifecycle (startup, shutdown, error handling)
 
-### 2. Access-ACE-Agent.exe (COM Worker)
+### 2. Access-ACE-Agent.exe (COM Interop Worker)
 **Language:** C# / .NET 4.8  
 **Platform:** Windows, x86 only  
-**Role:** COM interop layer with Microsoft Access
+**Role:** COM Interop layer with Microsoft Access
 
 **Key Responsibilities:**
 - Receives JSON-RPC calls over the named pipe
@@ -76,9 +76,9 @@ Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 wo
 - Serializes results back to JSON for the parent process
 
 **Why .NET 4.8?**
-- Microsoft.Office.Interop.Access (COM Interop) has well-proven stability on .NET Framework 4.8
-- .NET Framework was the original platform designed for COM automation
-- Decades of COM interop experience and patterns built into the runtime
+- Microsoft.Office.Interop.Access has well-proven stability on .NET Framework 4.8
+- .NET Framework was the original platform designed for COM Interop and Office automation
+- Decades of COM Interop experience and patterns built into the runtime
 - .NET 10 can reliably call .NET 4.8 via inter-process communication (pipes)
 
 **Important:** While .NET 10 has improved COM support, the two-process architecture is deliberately maintained for its significant architectural advantages (see "Why Two-Process Architecture?" below).
@@ -87,16 +87,16 @@ Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 wo
 
 ## Why Two-Process Architecture?
 
-The separation of the MCP Server (.NET 10) and COM Worker (.NET 4.8) into distinct processes provides significant architectural advantages:
+The separation of the MCP Server (.NET 10) and COM Interop Worker (.NET 4.8) into distinct processes provides significant architectural advantages:
 
 ### 1. **Crash Isolation** ⚠️ Critical
-**Problem:** Direct COM automation can fail unexpectedly
+**Problem:** Direct COM Interop automation can fail unexpectedly
 - Access may encounter unrecoverable errors
 - COM objects can become corrupted or unstable
 - A crash in Access takes down the entire process
 
 **Solution:** Separate worker process isolates failures
-- COM crash in Agent.exe doesn't affect MCP Server
+- COM Interop crash in Agent.exe doesn't affect MCP Server
 - Claude session remains responsive even if Access crashes
 - Users can restart the agent without losing MCP connection context
 - Database lockfile is cleaned up automatically when agent exits
@@ -113,10 +113,10 @@ The separation of the MCP Server (.NET 10) and COM Worker (.NET 4.8) into distin
 - Agent.exe uses simple, predictable STA thread model
 - MCP Server stays completely async and responsive
 - No thread-pool starvation or deadlocks
-- Claude requests are handled by server while agent works on COM automation
+- Claude requests are handled by server while agent works on COM Interop operations
 - Clear separation of async (server) vs. synchronous (agent) operations
 
-**Impact:** Better responsiveness; server never blocks on COM operations.
+**Impact:** Better responsiveness; server never blocks on COM Interop operations.
 
 ### 3. **Debuggability** 🐛 Development
 **Advantage:** Independent process debugging
@@ -133,15 +133,15 @@ The separation of the MCP Server (.NET 10) and COM Worker (.NET 4.8) into distin
 - Stateless, request-response handler
 - Implements MCP protocol specification
 - Manages tool definitions and descriptions
-- Zero knowledge of COM complexity
-- Can be updated without touching COM code
+- Zero knowledge of COM Interop complexity
+- Can be updated without touching COM Interop code
 
-**COM Worker** (Access-ACE-Agent.exe)
-- Stateful, COM object management
+**COM Interop Worker** (Access-ACE-Agent.exe)
+- Stateful, COM Interop object management
 - Manages database connections and Access lifecycle
 - Zero knowledge of MCP protocol
 - Can be updated without affecting server
-- Easier to unit test COM operations
+- Easier to unit test COM Interop operations
 
 **Impact:** Cleaner codebase; easier to maintain and extend each component independently.
 
@@ -239,9 +239,9 @@ Claude displays form list to user
 ## Tool Categories & Implementation
 
 ### Connection Management
-- **connect_access** - Creates COM object, opens database
-- **disconnect_access** - Closes COM connection, kills Access process
-- **is_connected** - Checks if Access object exists
+- **connect_access** - Creates COM Interop object, opens database
+- **disconnect_access** - Closes COM Interop connection, kills Access process
+- **is_connected** - Checks if COM Interop Access object exists
 
 ### Database Inspection
 - **get_forms**, **get_reports**, **get_modules**, **get_queries** - Enumerate collections
@@ -366,8 +366,8 @@ Published/
   ├── Access-ACE-MCP.exe          (Main server executable)
   ├── Access-ACE-MCP.dll          (Runtime assembly)
   ├── Access-ACE-MCP.pdb          (Debug symbols)
-  ├── Access-ACE-Agent.exe        (Worker process)
-  ├── Access-ACE-Agent.exe.config (COM worker config)
+  ├── Access-ACE-Agent.exe        (COM Interop worker process)
+  ├── Access-ACE-Agent.exe.config (COM Interop worker config)
   ├── Access-ACE-Agent.pdb        (Worker symbols)
   ├── *.deps.json                 (Dependency manifest)
   ├── *.runtimeconfig.json        (Runtime configuration)
@@ -385,7 +385,7 @@ Published/
 
 ### Code Execution
 - **VBA Execution:** Full code execution in Access context
-- **COM Invocation:** Generic method invocation can call any Access COM method
+- **COM Interop Invocation:** Generic method invocation can call any Access COM method via Interop
 - **Backup is essential:** No sandboxing between Claude and actual database
 
 ### Named Pipe Security
@@ -399,7 +399,7 @@ Published/
 
 ### Unit Tests (Access-ACE-MCP-Tests.csproj)
 - .NET Framework 4.8 compatibility tests
-- COM interop verification
+- COM Interop verification
 - SaveAsText / LoadFromText round-trip tests
 
 ### Integration Tests (Access-ACE-MCP-Tests-Net10.csproj)
@@ -413,7 +413,7 @@ Published/
 
 1. **32-bit only** - No 64-bit Access support
 2. **Single connection** - One database at a time per instance
-3. **Windows only** - COM automation is Windows-specific
+3. **Windows only** - COM Interop is Windows-specific
 4. **No transaction support** - Each tool call is independent
 5. **Form in design mode** - open_form can lock form temporarily
 6. **VBA debugging** - No integrated debugger, code review recommended
