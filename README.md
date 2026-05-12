@@ -13,7 +13,7 @@
 - 💾 **VBA Automation** - Execute VBA procedures, read/modify VBA source code, compile modules
 - 🎨 **Form Design** - Inspect and modify form controls, properties, and layouts
 - 📊 **Report Management** - Export, import, and delete reports
-- ⚙️ **Application Control** - Execute Access commands, invoke COM methods, evaluate expressions
+- ⚙️ **Application Control** - Execute Access commands, invoke COM Interop methods, evaluate expressions
 - 🔍 **Database Inspection** - List and explore all database objects with metadata
 - 📤 **Export/Import** - Round-trip export/import of database objects as text (SaveAsText/LoadFromText)
 
@@ -301,7 +301,7 @@ For technical details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 - **32-bit only** - 64-bit Access not supported
 - **Single connection** - One database at a time per instance
-- **Windows only** - Requires Windows and COM automation
+- **Windows only** - Requires Windows and COM Interop
 - **No datasheet operations** - Table data editing requires other tools
 - **No report preview** - Can modify reports but not preview them
 
@@ -320,7 +320,7 @@ Contributions are welcome! Please:
 ### Prerequisites
 - Visual Studio 2022 or later
 - .NET 10 SDK
-- .NET Framework 4.8 (for the COM worker)
+- .NET Framework 4.8 (for the COM Interop worker)
 
 ### Build Steps
 
@@ -377,7 +377,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
 ## Credits
 
 - Built with [Model Context Protocol](https://modelcontextprotocol.io/)
-- Uses Microsoft Office Interop for COM automation
+- Uses Microsoft Office Interop (strongly-typed COM Interop) for Access automation
 - Designed to work seamlessly with Claude AI
 
 ## Disclaimer
