@@ -57,13 +57,17 @@ cd Access-ACE-MCP
 # Open in Visual Studio
 # Build > Build Solution (Ctrl+Shift+B)
 
-# Publish the main project
+# Publish the main project (required before using with Claude)
 # Right-click Access-ACE-MCP > Publish
 ```
 
-Published files will be in the `Published` folder.
+Published files will be in the `Published` folder. This includes both `Access-ACE-MCP.exe` and `Access-ACE-Agent.exe`, which are required for Claude to use the MCP server.
 
 ## Configuration
+
+After building and publishing (or downloading a release), configure Claude Code to use Access-ACE-MCP by pointing to the published executable.
+
+**Important:** Make sure you have completed the build and publish steps above. Claude needs access to both `Access-ACE-MCP.exe` and `Access-ACE-Agent.exe` from the `Published` folder.
 
 ### Claude Code CLI
 
