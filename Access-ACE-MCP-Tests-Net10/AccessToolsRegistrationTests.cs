@@ -34,15 +34,17 @@ public class AccessToolsRegistrationTests
         "export_form_to_text", "import_form_from_text",
         "export_report_to_text", "import_report_from_text",
         "delete_form", "delete_report",
+        "get_table_definitions", "get_table_definition",
+        "get_objects_by_type", "compile_vba_with_errors", "get_database_summary",
     ];
 
     // ── Count & completeness ──────────────────────────────────────────────────
 
     [TestMethod]
-    public void ToolCount_Is35()
+    public void ToolCount_Is40()
     {
-        Assert.AreEqual(35, ToolMethods.Length,
-            $"Expected 35 tools. Found: {string.Join(", ", ToolMethods.Select(m => m.Name))}");
+        Assert.AreEqual(40, ToolMethods.Length,
+            $"Expected 40 tools. Found: {string.Join(", ", ToolMethods.Select(m => m.Name))}");
     }
 
     [TestMethod]

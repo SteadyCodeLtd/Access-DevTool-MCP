@@ -585,8 +585,8 @@ namespace Access_ACE_MCP
                 dynamic objects = null;
                 switch (objectType)
                 {
-                    case 0: objects = app.CurrentProject.AllTables; break;      // acTable
-                    case 1: objects = app.CurrentProject.AllQueries; break;     // acQuery
+                    case 0: objects = app.CurrentData.AllTables; break;         // acTable
+                    case 1: objects = app.CurrentData.AllQueries; break;        // acQuery
                     case 2: objects = app.CurrentProject.AllForms; break;       // acForm
                     case 3: objects = app.CurrentProject.AllReports; break;     // acReport
                     case 4: objects = app.CurrentProject.AllMacros; break;      // acMacro

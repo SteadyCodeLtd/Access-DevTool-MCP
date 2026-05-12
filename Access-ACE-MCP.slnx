@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Claude/" />
+  <Folder Name="/Claude/skills/">
+    <File Path=".claude/skills/access-ace-helper.md" />
+  </Folder>
   <Folder Name="/MDFiles/">
     <File Path="ARCHITECTURE.md" />
     <File Path="MCP_SETUP_GUIDE.md" />
