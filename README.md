@@ -22,6 +22,7 @@
 - 📖 **[Setup Guide](MCP_SETUP_GUIDE.md)** - Complete installation and usage guide
 - ⚡ **[Quick Start](QUICK_START.md)** - Get running in 30 seconds
 - 🏗️ **[Architecture](ARCHITECTURE.md)** - Technical deep dive and design documentation
+- 🤖 **[Claude Code Skill](.claude/skills/access-ace-helper.md)** - Expert guidance for using Access-ACE-MCP
 
 ## Requirements
 
@@ -113,6 +114,22 @@ Add the database path to the `args` array:
 # Simple backup example
 copy "C:\Users\YourName\MyDatabase.accdb" "C:\Users\YourName\MyDatabase_backup_2026-05-09.accdb"
 ```
+
+### 🤖 Using the Claude Code Skill for Guidance
+
+**Access-ACE-MCP includes a built-in Claude Code skill** that provides expert guidance on using all 40+ tools safely and effectively. When working with this project in Claude Code, the skill is automatically available.
+
+**The skill helps you with:**
+- **Safe operation patterns** - Recommended workflows for connecting, modifying objects, and disconnecting
+- **All 40+ tools** - Detailed reference for each tool, object type codes, and common operations
+- **Best practices** - Backup strategies, code review, version control, and gradual testing
+- **Troubleshooting** - Solutions for common connection issues, dialog handling, and lockfile behavior
+- **Code examples** - Ready-to-use patterns for forms, reports, VBA, and database inspection
+
+Simply ask Claude for help with any task, and the skill will provide context-aware guidance tailored to Access-ACE-MCP. For example:
+- "How do I safely modify a form control?"
+- "What's the pattern for exporting forms?"
+- "Help me understand the lockfile behavior"
 
 ### Important Usage Notes
 
@@ -333,6 +350,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
+- 🤖 **Interactive assistance:** Use the [Access-ACE-MCP Helper skill](.claude/skills/access-ace-helper.md) in Claude Code for expert guidance
 - 📖 **Full documentation:** See [MCP_SETUP_GUIDE.md](MCP_SETUP_GUIDE.md)
 - ⚡ **Quick start:** See [QUICK_START.md](QUICK_START.md)
 - 🏗️ **Architecture details:** See [ARCHITECTURE.md](ARCHITECTURE.md)
