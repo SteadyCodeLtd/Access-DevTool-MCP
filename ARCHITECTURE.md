@@ -76,9 +76,88 @@ Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 wo
 - Serializes results back to JSON for the parent process
 
 **Why .NET 4.8?**
-- Microsoft.Office.Interop.Access (COM Interop) has better stability on .NET Framework 4.8
-- .NET 10 can call .NET 4.8 via inter-process communication (pipes)
-- Avoids potential issues with direct COM interop from .NET 10
+- Microsoft.Office.Interop.Access (COM Interop) has well-proven stability on .NET Framework 4.8
+- .NET Framework was the original platform designed for COM automation
+- Decades of COM interop experience and patterns built into the runtime
+- .NET 10 can reliably call .NET 4.8 via inter-process communication (pipes)
+
+**Important:** While .NET 10 has improved COM support, the two-process architecture is deliberately maintained for its significant architectural advantages (see "Why Two-Process Architecture?" below).
+
+---
+
+## Why Two-Process Architecture?
+
+The separation of the MCP Server (.NET 10) and COM Worker (.NET 4.8) into distinct processes provides significant architectural advantages:
+
+### 1. **Crash Isolation** ⚠️ Critical
+**Problem:** Direct COM automation can fail unexpectedly
+- Access may encounter unrecoverable errors
+- COM objects can become corrupted or unstable
+- A crash in Access takes down the entire process
+
+**Solution:** Separate worker process isolates failures
+- COM crash in Agent.exe doesn't affect MCP Server
+- Claude session remains responsive even if Access crashes
+- Users can restart the agent without losing MCP connection context
+- Database lockfile is cleaned up automatically when agent exits
+
+**Impact:** Users can recover gracefully from Access failures without losing their Claude conversation context.
+
+### 2. **Threading Isolation** 🔒 Performance
+**Problem:** COM requires Single-Threaded Apartment (STA) threading
+- Access COM objects MUST be accessed from a single thread
+- Creating dedicated STA threads in a .NET 10 async context is complex and limits concurrency
+- Mixing STA and thread-pool threads causes synchronization issues
+
+**Solution:** Dedicated worker process with dedicated STA threads
+- Agent.exe uses simple, predictable STA thread model
+- MCP Server stays completely async and responsive
+- No thread-pool starvation or deadlocks
+- Claude requests are handled by server while agent works on COM automation
+- Clear separation of async (server) vs. synchronous (agent) operations
+
+**Impact:** Better responsiveness; server never blocks on COM operations.
+
+### 3. **Debuggability** 🐛 Development
+**Advantage:** Independent process debugging
+- Can attach Visual Studio debugger to either process independently
+- MCP Server and COM Worker can be debugged simultaneously
+- Breakpoints in one process don't freeze the other
+- Easier to diagnose protocol vs. COM issues
+- Named pipe communication is traceable and loggable
+
+**Impact:** Faster development cycles and easier troubleshooting.
+
+### 4. **Separation of Concerns** 🏗️ Architecture
+**MCP Server** (Access-ACE-MCP.exe)
+- Stateless, request-response handler
+- Implements MCP protocol specification
+- Manages tool definitions and descriptions
+- Zero knowledge of COM complexity
+- Can be updated without touching COM code
+
+**COM Worker** (Access-ACE-Agent.exe)
+- Stateful, COM object management
+- Manages database connections and Access lifecycle
+- Zero knowledge of MCP protocol
+- Can be updated without affecting server
+- Easier to unit test COM operations
+
+**Impact:** Cleaner codebase; easier to maintain and extend each component independently.
+
+### 5. **Graceful Degradation** 📉 Resilience
+- Server continues running if agent crashes
+- Agent can be respawned for new database connections
+- Multiple independent database sessions possible (multiple agent instances)
+- Server can detect and report agent failures cleanly
+
+### Trade-offs Accepted
+The advantages above justify accepting these trade-offs:
+- **IPC Latency:** Named pipe communication adds ~1-5ms per call (negligible for interactive use)
+- **Deployment Complexity:** Both .exe files must be present and discoverable
+- **Process Overhead:** Two processes instead of one (~20MB additional memory)
+
+---
 
 ### 3. Named Pipe Channel (IPC)
 **Protocol:** JSON-RPC 2.0 over named pipes  
