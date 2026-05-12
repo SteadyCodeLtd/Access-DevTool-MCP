@@ -93,9 +93,20 @@ Add to `~/.claude/settings.json`:
    - **Command:** `C:\Tools\Access-ACE-MCP\Access-ACE-MCP.exe`
 4. Click **"Add"**
 
-### Auto-Connect to Specific Database
+### Optional: Auto-Connect to a Database (Advanced)
 
-Add the database path to the `args` array:
+You can optionally pass a database path as an argument to auto-connect when the server starts. However, **this is not recommended for normal usage** because:
+- Auto-connect only happens once when the MCP server first starts
+- It doesn't persist across Claude Code restarts
+- It can mask connection errors if the database becomes unavailable
+- You lose explicit control over when the connection opens/closes
+
+**For normal workflows, explicitly call `connect_access` as part of your task.** This gives you:
+- Clear visibility into when connections open and close
+- Better error handling and recovery
+- Ability to work with multiple databases across sessions
+
+If you want to auto-connect for testing/development purposes:
 
 ```json
 {
@@ -107,6 +118,8 @@ Add the database path to the `args` array:
   }
 }
 ```
+
+**When using auto-connect:** Still include an explicit `disconnect_access` call when you're done, as the connection persists for the entire Claude Code session.
 
 ## Usage
 
