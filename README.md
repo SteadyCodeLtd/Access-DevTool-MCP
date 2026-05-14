@@ -4,7 +4,7 @@
 [![.NET Version](https://img.shields.io/badge/.NET-10.0-blue)](https://dotnet.microsoft.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2032--bit-blue)](https://www.microsoft.com/)
 
-**Access-DevTool-MCP** is a Model Context Protocol (MCP) server that enables Claude AI to interact with Microsoft Access databases through COM Interop automation. Automate database management, modify forms and reports, execute VBA code, and manage database objects programmatically.
+**Access-DevTool-MCP** is a Model Context Protocol (MCP) server that enables Claude AI to interact with Microsoft Access databases through COM Interop automation. Modify forms and reports, modify and execute VBA code, and manage database objects programmatically.
 
 ## Features
 
@@ -28,7 +28,7 @@
 
 ### System
 - **Windows Operating System** (Windows 10 or later recommended)
-- **32-bit Microsoft Access** (Office 2010, 2013, 2016, 2019, 2021, or Microsoft 365)
+- **32-bit Microsoft Access** (Office 2016 SP1+, 2019, 2021, or Microsoft 365)
   - ⚠️ **64-bit Access is NOT supported**
 - **.NET Runtime** (included with published builds)
 
@@ -76,7 +76,7 @@ Add to `~/.claude/settings.json`:
 ```json
 {
   "mcpServers": {
-    "Access-DevTool": {
+    "access-devtool-mcp": {
       "command": "C:\\Tools\\Access-DevTool-MCP\\Access-DevTool-MCP.exe",
       "args": []
     }
@@ -89,8 +89,8 @@ Add to `~/.claude/settings.json`:
 1. Open **Settings > MCP Servers**
 2. Click **"Add Server"**
 3. Enter:
-   - **Name:** `Access-DevTool`
-   - **Command:** `C:\Tools\Access-DevTool-MCP\Access-DevTool-MCP.exe`
+   - **Name:** `access-devtool-mcp`
+   - **Command:** `C:\\Tools\\Access-DevTool-MCP\\Access-DevTool-MCP.exe`
 4. Click **"Add"**
 
 ### Optional: Auto-Connect to a Database (Advanced)

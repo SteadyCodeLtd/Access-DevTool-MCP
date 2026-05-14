@@ -13,7 +13,7 @@ Build > Build Solution
 
 Published executable location:
 ```
-C:\GitHub\Access-DevTool-MCP\Published\Access-DevTool-MCP.exe
+C:\\GitHub\\Access-DevTool-MCP\\Published\\Access-DevTool-MCP.exe
 ```
 
 ### 2. Configure Claude Code
@@ -21,7 +21,7 @@ C:\GitHub\Access-DevTool-MCP\Published\Access-DevTool-MCP.exe
 **Add to `~/.claude/settings.json` (CLI):**
 ```json
 "mcpServers": {
-  "Access-DevTool": {
+  "access-devtool-mcp": {
     "command": "C:\\GitHub\\Access-DevTool-MCP\\Published\\Access-DevTool-MCP.exe",
     "args": []
   }

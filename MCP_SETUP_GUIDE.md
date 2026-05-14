@@ -32,7 +32,7 @@ If anything goes wrong during Claude's modifications, you'll have your original 
 
 ### Prerequisites
 - **Windows operating system** (this tool is Windows-only)
-- **32-bit Microsoft Access** (Office 2010, 2013, 2016, 2019, 2021, or Microsoft 365)
+- **32-bit Microsoft Access** (Office 2016 SP1+, 2019, 2021, or Microsoft 365)
   - **IMPORTANT:** 64-bit Access is **NOT supported**. If you have 64-bit Office installed, you must install the 32-bit version side-by-side
 - **.NET Runtime** (the published executable handles this automatically with the runtime config)
 
@@ -97,7 +97,7 @@ Access-DevTool-MCP is configured as an MCP server that Claude Code can use. You 
 
    ```json
    "mcpServers": {
-     "Access-DevTool": {
+     "access-devtool-mcp": {
        "command": "C:\\GitHub\\Access-DevTool-MCP\\Published\\Access-DevTool-MCP.exe",
        "args": []
      }
@@ -110,7 +110,7 @@ Access-DevTool-MCP is configured as an MCP server that Claude Code can use. You 
 
    ```json
    "mcpServers": {
-     "Access-DevTool": {
+     "access-devtool-mcp": {
        "command": "C:\\GitHub\\Access-DevTool-MCP\\Published\\Access-DevTool-MCP.exe",
        "args": ["C:\\path\\to\\your\\database.accdb"]
      }
@@ -126,12 +126,12 @@ Access-DevTool-MCP is configured as an MCP server that Claude Code can use. You 
 2. **Go to Settings > MCP Servers**
 
 3. **Click "Add Server"** and enter:
-   - **Name:** `Access-DevTool` (or any name you prefer)
-   - **Command:** `C:\GitHub\Access-DevTool-MCP\Published\Access-DevTool-MCP.exe`
+   - **Name:** `access-devtool-mcp` (or any name you prefer)
+   - **Command:** `C:\\GitHub\\Access-DevTool-MCP\\Published\\Access-DevTool-MCP.exe`
    - **Arguments:** (leave empty, or add database path below)
 
 4. **To auto-connect to a specific database:**
-   - Add the argument: `C:\path\to\your\database.accdb`
+   - Add the argument: `C:\\path\\to\\your\\database.accdb`
 
 5. **Click "Add"** and the server will connect
 
