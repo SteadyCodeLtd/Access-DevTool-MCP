@@ -8,7 +8,7 @@ namespace AccessAceMcp;
 
 [McpServerToolType]
 [SupportedOSPlatform("windows")]
-internal sealed class AccessTools(PipeChannel channel)
+public sealed class AccessTools(PipeChannel channel)
 {
     // ── Connection ───────────────────────────────────────────────────────────────
 

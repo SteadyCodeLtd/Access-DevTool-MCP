@@ -9,7 +9,7 @@ namespace AccessAceMcp;
 /// Thread-safe named pipe client that serializes JSON requests to the .NET 4.8 worker
 /// and returns the raw JSON result string.
 /// </summary>
-internal sealed class PipeChannel : IDisposable
+public sealed class PipeChannel : IDisposable
 {
     private static readonly JsonSerializerOptions _opts = new()
     {
