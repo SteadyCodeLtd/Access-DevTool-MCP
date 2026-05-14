@@ -1,8 +1,8 @@
-# Access-ACE-MCP: Setup and Usage Guide
+# Access-DevTool-MCP: Setup and Usage Guide
 
 ## Overview
 
-**Access-ACE-MCP** is a Model Context Protocol (MCP) server that enables Claude to interact with Microsoft Access databases (.accdb and .mdb files) through COM Interop automation. This allows Claude to read, modify, and manage Access database objects including tables, queries, forms, reports, modules, and VBA code.
+**Access-DevTool-MCP** is a Model Context Protocol (MCP) server that enables Claude to interact with Microsoft Access databases (.accdb and .mdb files) through COM Interop automation. This allows Claude to read, modify, and manage Access database objects including tables, queries, forms, reports, modules, and VBA code.
 
 The server provides comprehensive access to Access's object model, allowing you to:
 - Connect to and manage Access databases
@@ -56,7 +56,7 @@ If you haven't already built the project:
 
 1. Open the solution in **Visual Studio 2022** or later:
    ```
-   C:\GitHub\Access-ACE-MCP\Access-ACE-MCP.slnx
+   C:\GitHub\Access-DevTool-MCP\Access-DevTool-MCP.slnx
    ```
 
 2. Build the solution:
@@ -64,7 +64,7 @@ If you haven't already built the project:
    - Or: **Release > Build**
 
 3. After building, publish the main project:
-   - Right-click **Access-ACE-MCP** project
+   - Right-click **Access-DevTool-MCP** project
    - Select **Publish**
    - Follow the publish wizard to create a release build
 
@@ -74,19 +74,19 @@ The published executable will be located in the **Published** folder at the root
 
 After publishing, the MCP server executable and all dependencies will be in:
 ```
-C:\GitHub\Access-ACE-MCP\Published\Access-ACE-MCP.exe
+C:\GitHub\Access-DevTool-MCP\Published\Access-DevTool-MCP.exe
 ```
 
 This folder contains:
-- `Access-ACE-MCP.exe` - The main MCP server executable
-- `Access-ACE-Agent.exe` - The .NET 4.8 COM worker (must be present)
+- `Access-DevTool-MCP.exe` - The main MCP server executable
+- `Access-DevTool-Agent.exe` - The .NET 4.8 COM worker (must be present)
 - All required .NET runtime dependencies and DLLs
 
 ---
 
 ## Configuration for Claude Code
 
-Access-ACE-MCP is configured as an MCP server that Claude Code can use. You can set it up in two ways:
+Access-DevTool-MCP is configured as an MCP server that Claude Code can use. You can set it up in two ways:
 
 ### Option A: Claude Code CLI
 
@@ -97,8 +97,8 @@ Access-ACE-MCP is configured as an MCP server that Claude Code can use. You can 
 
    ```json
    "mcpServers": {
-     "access-ace": {
-       "command": "C:\\GitHub\\Access-ACE-MCP\\Published\\Access-ACE-MCP.exe",
+     "Access-DevTool": {
+       "command": "C:\\GitHub\\Access-DevTool-MCP\\Published\\Access-DevTool-MCP.exe",
        "args": []
      }
    }
@@ -110,8 +110,8 @@ Access-ACE-MCP is configured as an MCP server that Claude Code can use. You can 
 
    ```json
    "mcpServers": {
-     "access-ace": {
-       "command": "C:\\GitHub\\Access-ACE-MCP\\Published\\Access-ACE-MCP.exe",
+     "Access-DevTool": {
+       "command": "C:\\GitHub\\Access-DevTool-MCP\\Published\\Access-DevTool-MCP.exe",
        "args": ["C:\\path\\to\\your\\database.accdb"]
      }
    }
@@ -126,8 +126,8 @@ Access-ACE-MCP is configured as an MCP server that Claude Code can use. You can 
 2. **Go to Settings > MCP Servers**
 
 3. **Click "Add Server"** and enter:
-   - **Name:** `access-ace` (or any name you prefer)
-   - **Command:** `C:\GitHub\Access-ACE-MCP\Published\Access-ACE-MCP.exe`
+   - **Name:** `Access-DevTool` (or any name you prefer)
+   - **Command:** `C:\GitHub\Access-DevTool-MCP\Published\Access-DevTool-MCP.exe`
    - **Arguments:** (leave empty, or add database path below)
 
 4. **To auto-connect to a specific database:**
@@ -153,7 +153,7 @@ You don't need to pre-configure the server. In any Claude conversation, you can 
 **What Claude will do:**
 1. Call `connect_access` with the database path
 2. Verify that 32-bit Access is installed
-3. Launch the Access-ACE-Agent worker process
+3. Launch the Access-DevTool-Agent worker process
 4. Call `get_forms` to retrieve the list of forms
 5. Return the results
 
@@ -230,7 +230,7 @@ Claude will automatically connect using that path.
 
 ## Available Tools
 
-The Access-ACE-MCP server exposes the following tools to Claude:
+The Access-DevTool-MCP server exposes the following tools to Claude:
 
 ### Connection Management
 - **connect_access** - Connect to an Access database (.accdb or .mdb)
@@ -295,20 +295,20 @@ The Access-ACE-MCP server exposes the following tools to Claude:
 2. Download and install the **32-bit version** of Microsoft Office/Access
 3. If you need both versions, you can install 32-bit Office/Access alongside your existing 64-bit setup (requires careful installation order)
 
-### "Access-ACE-Agent.exe not found"
+### "Access-DevTool-Agent.exe not found"
 
 **Cause:** The Published folder is missing the agent executable.
 
 **Solution:**
 1. Rebuild the entire solution in Visual Studio
-2. Re-publish the main Access-ACE-MCP project
+2. Re-publish the main Access-DevTool-MCP project
 3. Ensure both executables are in the Published folder:
-   - `Access-ACE-Agent.exe`
-   - `Access-ACE-MCP.exe`
+   - `Access-DevTool-Agent.exe`
+   - `Access-DevTool-MCP.exe`
 
 ### Connection times out (30 seconds)
 
-**Cause:** The Access-ACE-Agent process failed to start or the named pipe connection failed.
+**Cause:** The Access-DevTool-Agent process failed to start or the named pipe connection failed.
 
 **Possible solutions:**
 1. Verify 32-bit Access is installed correctly

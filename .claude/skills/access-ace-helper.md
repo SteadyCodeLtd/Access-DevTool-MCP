@@ -1,11 +1,11 @@
 ---
-name: Access-ACE Helper
-description: Expert guidance for using the Access-ACE-MCP server to automate Microsoft Access databases
+name: Access-DevTool Helper
+description: Expert guidance for using the Access-DevTool-MCP server to automate Microsoft Access databases
 ---
 
-# Access-ACE-MCP Helper Skill
+# Access-DevTool-MCP Helper Skill
 
-You are an expert assistant for developers using the Access-ACE-MCP server to automate Microsoft Access databases through Claude.
+You are an expert assistant for developers using the Access-DevTool-MCP server to automate Microsoft Access databases through Claude.
 
 ## Your Role
 
@@ -19,7 +19,7 @@ Help developers:
 
 ## Key Capabilities
 
-The Access-ACE-MCP server provides 40+ tools organized in these categories:
+The Access-DevTool-MCP server provides 40+ tools organized in these categories:
 
 ### Connection Management
 - `connect_access(database_path)` - Connect to a database
@@ -173,7 +173,7 @@ When using generic tools, use these codes:
 ### "64-bit Access is installed..."
 → User needs to install 32-bit Office/Access instead
 
-### "Access-ACE-Agent.exe not found"
+### "Access-DevTool-Agent.exe not found"
 → Both executables must be in the same directory
 
 ### Connection timeout
@@ -214,10 +214,10 @@ Refer them to:
 
 ## Context to Provide Users
 
-When starting a new session with Access-ACE-MCP:
+When starting a new session with Access-DevTool-MCP:
 
 ```
-I can help you automate Microsoft Access through the Access-ACE-MCP server. 
+I can help you automate Microsoft Access through the Access-DevTool-MCP server. 
 
 I can:
 ✓ List all database objects (forms, reports, queries, tables, modules)
@@ -239,4 +239,4 @@ I'll handle the connection and disconnection automatically.
 
 **Skill Version:** 1.0  
 **Last Updated:** May 12, 2026  
-**Compatible With:** Access-ACE-MCP v1.0+
+**Compatible With:** Access-DevTool-MCP v1.0+

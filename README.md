@@ -1,10 +1,10 @@
-# Access-ACE-MCP
+# Access-DevTool-MCP
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![.NET Version](https://img.shields.io/badge/.NET-10.0-blue)](https://dotnet.microsoft.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2032--bit-blue)](https://www.microsoft.com/)
 
-**Access-ACE-MCP** is a Model Context Protocol (MCP) server that enables Claude AI to interact with Microsoft Access databases through COM Interop automation. Automate database management, modify forms and reports, execute VBA code, and manage database objects programmatically.
+**Access-DevTool-MCP** is a Model Context Protocol (MCP) server that enables Claude AI to interact with Microsoft Access databases through COM Interop automation. Automate database management, modify forms and reports, execute VBA code, and manage database objects programmatically.
 
 ## Features
 
@@ -22,7 +22,7 @@
 - 📖 **[Setup Guide](MCP_SETUP_GUIDE.md)** - Complete installation and usage guide
 - ⚡ **[Quick Start](QUICK_START.md)** - Get running in 30 seconds
 - 🏗️ **[Architecture](ARCHITECTURE.md)** - Technical deep dive and design documentation
-- 🤖 **[Claude Code Skill](.claude/skills/access-ace-helper.md)** - Expert guidance for using Access-ACE-MCP
+- 🤖 **[Claude Code Skill](.claude/skills/Access-DevTool-helper.md)** - Expert guidance for using Access-DevTool-MCP
 
 ## Requirements
 
@@ -41,33 +41,33 @@
 ### Option 1: Use Published Build (Recommended)
 
 1. **Download** the latest release from the [Releases](../../releases) page
-2. **Extract** to a location like `C:\Tools\Access-ACE-MCP\`
+2. **Extract** to a location like `C:\Tools\Access-DevTool-MCP\`
 3. **Verify** both executables are present:
-   - `Access-ACE-MCP.exe`
-   - `Access-ACE-Agent.exe`
+   - `Access-DevTool-MCP.exe`
+   - `Access-DevTool-Agent.exe`
 4. Skip to [Configuration](#configuration)
 
 ### Option 2: Build from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_ORG/Access-ACE-MCP.git
-cd Access-ACE-MCP
+git clone https://github.com/YOUR_ORG/Access-DevTool-MCP.git
+cd Access-DevTool-MCP
 
 # Open in Visual Studio
 # Build > Build Solution (Ctrl+Shift+B)
 
 # Publish the main project (required before using with Claude)
-# Right-click Access-ACE-MCP > Publish
+# Right-click Access-DevTool-MCP > Publish
 ```
 
-Published files will be in the `Published` folder. This includes both `Access-ACE-MCP.exe` and `Access-ACE-Agent.exe`, which are required for Claude to use the MCP server.
+Published files will be in the `Published` folder. This includes both `Access-DevTool-MCP.exe` and `Access-DevTool-Agent.exe`, which are required for Claude to use the MCP server.
 
 ## Configuration
 
-After building and publishing (or downloading a release), configure Claude Code to use Access-ACE-MCP by pointing to the published executable.
+After building and publishing (or downloading a release), configure Claude Code to use Access-DevTool-MCP by pointing to the published executable.
 
-**Important:** Make sure you have completed the build and publish steps above. Claude needs access to both `Access-ACE-MCP.exe` and `Access-ACE-Agent.exe` from the `Published` folder.
+**Important:** Make sure you have completed the build and publish steps above. Claude needs access to both `Access-DevTool-MCP.exe` and `Access-DevTool-Agent.exe` from the `Published` folder.
 
 ### Claude Code CLI
 
@@ -76,8 +76,8 @@ Add to `~/.claude/settings.json`:
 ```json
 {
   "mcpServers": {
-    "access-ace": {
-      "command": "C:\\Tools\\Access-ACE-MCP\\Access-ACE-MCP.exe",
+    "Access-DevTool": {
+      "command": "C:\\Tools\\Access-DevTool-MCP\\Access-DevTool-MCP.exe",
       "args": []
     }
   }
@@ -89,8 +89,8 @@ Add to `~/.claude/settings.json`:
 1. Open **Settings > MCP Servers**
 2. Click **"Add Server"**
 3. Enter:
-   - **Name:** `access-ace`
-   - **Command:** `C:\Tools\Access-ACE-MCP\Access-ACE-MCP.exe`
+   - **Name:** `Access-DevTool`
+   - **Command:** `C:\Tools\Access-DevTool-MCP\Access-DevTool-MCP.exe`
 4. Click **"Add"**
 
 ### Optional: Auto-Connect to a Database (Advanced)
@@ -111,8 +111,8 @@ If you want to auto-connect for testing/development purposes:
 ```json
 {
   "mcpServers": {
-    "access-ace": {
-      "command": "C:\\Tools\\Access-ACE-MCP\\Access-ACE-MCP.exe",
+    "Access-DevTool": {
+      "command": "C:\\Tools\\Access-DevTool-MCP\\Access-DevTool-MCP.exe",
       "args": ["C:\\Users\\YourName\\MyDatabase.accdb"]
     }
   }
@@ -134,7 +134,7 @@ copy "C:\Users\YourName\MyDatabase.accdb" "C:\Users\YourName\MyDatabase_backup_2
 
 ### 🤖 Using the Claude Code Skill for Guidance
 
-**Access-ACE-MCP includes a built-in Claude Code skill** that provides expert guidance on using all 40+ tools safely and effectively. When working with this project in Claude Code, the skill is automatically available.
+**Access-DevTool-MCP includes a built-in Claude Code skill** that provides expert guidance on using all 40+ tools safely and effectively. When working with this project in Claude Code, the skill is automatically available.
 
 **The skill helps you with:**
 - **Safe operation patterns** - Recommended workflows for connecting, modifying objects, and disconnecting
@@ -143,7 +143,7 @@ copy "C:\Users\YourName\MyDatabase.accdb" "C:\Users\YourName\MyDatabase_backup_2
 - **Troubleshooting** - Solutions for common connection issues, dialog handling, and lockfile behavior
 - **Code examples** - Ready-to-use patterns for forms, reports, VBA, and database inspection
 
-Simply ask Claude for help with any task, and the skill will provide context-aware guidance tailored to Access-ACE-MCP. For example:
+Simply ask Claude for help with any task, and the skill will provide context-aware guidance tailored to Access-DevTool-MCP. For example:
 - "How do I safely modify a form control?"
 - "What's the pattern for exporting forms?"
 - "Help me understand the lockfile behavior"
@@ -152,7 +152,7 @@ Simply ask Claude for help with any task, and the skill will provide context-awa
 
 #### Who Should Use This Tool
 
-**Access-ACE-MCP is intended for developers and power users who need to modify Access applications**, not for end users. This tool provides full programmatic access to database structure, code, and design. Use it only if you understand database design and are comfortable modifying VBA code and database objects.
+**Access-DevTool-MCP is intended for developers and power users who need to modify Access applications**, not for end users. This tool provides full programmatic access to database structure, code, and design. Use it only if you understand database design and are comfortable modifying VBA code and database objects.
 
 #### Getting Started Checklist
 
@@ -235,7 +235,7 @@ Claude will:
 
 ## Available Tools
 
-Access-ACE-MCP exposes 40+ tools for database automation:
+Access-DevTool-MCP exposes 40+ tools for database automation:
 
 | Category | Tools |
 |----------|-------|
@@ -261,7 +261,7 @@ See [MCP_SETUP_GUIDE.md](MCP_SETUP_GUIDE.md#available-tools) for complete tool d
 # File > Account > About Access button Look for "32-bit" or "64-bit"
 ```
 
-### "Access-ACE-Agent.exe not found"
+### "Access-DevTool-Agent.exe not found"
 
 **Solution:** Rebuild and republish the solution. The agent must be in the same folder as the MCP server executable.
 
@@ -281,12 +281,12 @@ For more troubleshooting, see [MCP_SETUP_GUIDE.md#troubleshooting](MCP_SETUP_GUI
 
 ## Architecture
 
-Access-ACE-MCP uses a two-process architecture:
+Access-DevTool-MCP uses a two-process architecture:
 
 ```
-Claude → Access-ACE-MCP.exe (.NET 10) 
+Claude → Access-DevTool-MCP.exe (.NET 10) 
          ↓ (Named Pipe IPC)
-         Access-ACE-Agent.exe (.NET 4.8 COM Interop Worker)
+         Access-DevTool-Agent.exe (.NET 4.8 COM Interop Worker)
          ↓ (Access COM Interop)
          Microsoft Access
 ```
@@ -339,8 +339,8 @@ Contributions are welcome! Please:
 
 ```bash
 # Clone and navigate
-git clone https://github.com/YOUR_ORG/Access-ACE-MCP.git
-cd Access-ACE-MCP
+git clone https://github.com/YOUR_ORG/Access-DevTool-MCP.git
+cd Access-DevTool-MCP
 
 # Build all projects
 dotnet build
@@ -349,7 +349,7 @@ dotnet build
 # Build > Build Solution (Ctrl+Shift+B)
 
 # Publish for distribution
-# Right-click Access-ACE-MCP project > Publish
+# Right-click Access-DevTool-MCP project > Publish
 # Output goes to ./Published folder
 ```
 
@@ -357,8 +357,8 @@ dotnet build
 
 ```bash
 # Run unit tests
-dotnet test Access-ACE-MCP-Tests.csproj
-dotnet test Access-ACE-MCP-Tests-Net10.csproj
+dotnet test Access-DevTool-MCP-Tests.csproj
+dotnet test Access-DevTool-MCP-Tests-Net10.csproj
 ```
 
 ## License
@@ -367,7 +367,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- 🤖 **Interactive assistance:** Use the [Access-ACE-MCP Helper skill](.claude/skills/access-ace-helper.md) in Claude Code for expert guidance
+- 🤖 **Interactive assistance:** Use the [Access-DevTool-MCP Helper skill](.claude/skills/Access-DevTool-helper.md) in Claude Code for expert guidance
 - 📖 **Full documentation:** See [MCP_SETUP_GUIDE.md](MCP_SETUP_GUIDE.md)
 - ⚡ **Quick start:** See [QUICK_START.md](QUICK_START.md)
 - 🏗️ **Architecture details:** See [ARCHITECTURE.md](ARCHITECTURE.md)

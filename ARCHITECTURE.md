@@ -1,8 +1,8 @@
-# Access-ACE-MCP: Architecture Overview
+# Access-DevTool-MCP: Architecture Overview
 
 ## System Design
 
-Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 world with Access's COM requirements:
+Access-DevTool-MCP uses a **two-process architecture** to bridge Claude's .NET 10 world with Access's COM requirements:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -13,7 +13,7 @@ Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 wo
                         │ stdio (JSON-RPC)
                         ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ Access-ACE-MCP.exe (.NET 10, x86)                           │
+│ Access-DevTool-MCP.exe (.NET 10, x86)                           │
 │ ┌────────────────────────────────────────────────────────┐  │
 │ │ - MCP Server Handler (ModelContextProtocol)           │  │
 │ │ - Tool definitions & descriptions                      │  │
@@ -22,10 +22,10 @@ Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 wo
 │ └────────────────────────────────────────────────────────┘  │
 │                        ↓                                      │
 │                  Named Pipe Channel                          │
-│            (IPC: access-ace-{ProcessID})                    │
+│            (IPC: Access-DevTool-{ProcessID})                    │
 │                        ↓                                      │
 │ ┌────────────────────────────────────────────────────────┐  │
-│ │ Access-ACE-Agent.exe (.NET 4.8, x86 COM Interop)     │  │
+│ │ Access-DevTool-Agent.exe (.NET 4.8, x86 COM Interop)     │  │
 │ │ ┌──────────────────────────────────────────────────┐  │  │
 │ │ │ - COM Interop (Microsoft.Office.Interop.Access)│  │  │
 │ │ │ - Database connection management                 │  │  │
@@ -46,7 +46,7 @@ Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 wo
 
 ## Component Breakdown
 
-### 1. Access-ACE-MCP.exe (Main Server)
+### 1. Access-DevTool-MCP.exe (Main Server)
 **Language:** C# / .NET 10.0  
 **Platform:** Windows, x86 only  
 **Role:** MCP server entry point
@@ -58,12 +58,12 @@ Access-ACE-MCP uses a **two-process architecture** to bridge Claude's .NET 10 wo
 
 **Key Responsibilities:**
 - Listens on stdio for MCP requests from Claude
-- Spawns the Access-ACE-Agent worker process with a unique pipe name
+- Spawns the Access-DevTool-Agent worker process with a unique pipe name
 - Detects installed Access bitness (32-bit vs 64-bit) and rejects x64
 - Routes tool calls to the worker process via named pipes
 - Handles application lifecycle (startup, shutdown, error handling)
 
-### 2. Access-ACE-Agent.exe (COM Interop Worker)
+### 2. Access-DevTool-Agent.exe (COM Interop Worker)
 **Language:** C# / .NET 4.8  
 **Platform:** Windows, x86 only  
 **Role:** COM Interop layer with Microsoft Access
@@ -129,14 +129,14 @@ The separation of the MCP Server (.NET 10) and COM Interop Worker (.NET 4.8) int
 **Impact:** Faster development cycles and easier troubleshooting.
 
 ### 4. **Separation of Concerns** 🏗️ Architecture
-**MCP Server** (Access-ACE-MCP.exe)
+**MCP Server** (Access-DevTool-MCP.exe)
 - Stateless, request-response handler
 - Implements MCP protocol specification
 - Manages tool definitions and descriptions
 - Zero knowledge of COM Interop complexity
 - Can be updated without touching COM Interop code
 
-**COM Interop Worker** (Access-ACE-Agent.exe)
+**COM Interop Worker** (Access-DevTool-Agent.exe)
 - Stateful, COM Interop object management
 - Manages database connections and Access lifecycle
 - Zero knowledge of MCP protocol
@@ -161,7 +161,7 @@ The advantages above justify accepting these trade-offs:
 
 ### 3. Named Pipe Channel (IPC)
 **Protocol:** JSON-RPC 2.0 over named pipes  
-**Pipe Name:** `access-ace-{ProcessID}` (unique per invocation)
+**Pipe Name:** `Access-DevTool-{ProcessID}` (unique per invocation)
 
 **Example Call:**
 ```json
@@ -273,7 +273,7 @@ Claude displays form list to user
 
 ## Access Bitness Detection
 
-Access-ACE-MCP enforces **32-bit only** because:
+Access-DevTool-MCP enforces **32-bit only** because:
 1. COM interop is simpler and more stable on 32-bit
 2. Both MCP server and agent are x86 (32-bit)
 3. Registry keys differ for 32-bit vs 64-bit Office
@@ -290,11 +290,11 @@ Access-ACE-MCP enforces **32-bit only** because:
 
 ### Startup
 ```
-User runs: Access-ACE-MCP.exe [optional_database_path]
+User runs: Access-DevTool-MCP.exe [optional_database_path]
   ↓
 Program.cs detects Agent.exe location
   ↓
-Unique pipe name generated: access-ace-{PID}
+Unique pipe name generated: Access-DevTool-{PID}
   ↓
 Agent process spawned with: --pipe {name} [{database_path}]
   ↓
@@ -347,28 +347,28 @@ Processes exit cleanly
 ## Building & Publishing
 
 ### Project Dependencies
-- **Access-ACE-MCP.csproj**
+- **Access-DevTool-MCP.csproj**
   - ModelContextProtocol (NuGet, prerelease)
   - Microsoft.Extensions.Hosting (v9.*)
 
-- **Access-ACE-Agent.csproj**
+- **Access-DevTool-Agent.csproj**
   - Microsoft.Office.Interop.Access (COM Interop wrapper)
   - System.ComponentModel
   - No MCP dependencies
 
-### Build Targets (in Access-ACE-MCP.csproj)
+### Build Targets (in Access-DevTool-MCP.csproj)
 1. `BuildAccessAceAgentForPublish` - Pre-publish: builds agent
 2. `CopyAccessAceAgentToPublish` - Post-publish: copies agent.exe to output
 
 ### Published Output
 ```
 Published/
-  ├── Access-ACE-MCP.exe          (Main server executable)
-  ├── Access-ACE-MCP.dll          (Runtime assembly)
-  ├── Access-ACE-MCP.pdb          (Debug symbols)
-  ├── Access-ACE-Agent.exe        (COM Interop worker process)
-  ├── Access-ACE-Agent.exe.config (COM Interop worker config)
-  ├── Access-ACE-Agent.pdb        (Worker symbols)
+  ├── Access-DevTool-MCP.exe          (Main server executable)
+  ├── Access-DevTool-MCP.dll          (Runtime assembly)
+  ├── Access-DevTool-MCP.pdb          (Debug symbols)
+  ├── Access-DevTool-Agent.exe        (COM Interop worker process)
+  ├── Access-DevTool-Agent.exe.config (COM Interop worker config)
+  ├── Access-DevTool-Agent.pdb        (Worker symbols)
   ├── *.deps.json                 (Dependency manifest)
   ├── *.runtimeconfig.json        (Runtime configuration)
   └── [Dependencies]              (All .NET framework DLLs)
@@ -397,12 +397,12 @@ Published/
 
 ## Testing
 
-### Unit Tests (Access-ACE-MCP-Tests.csproj)
+### Unit Tests (Access-DevTool-MCP-Tests.csproj)
 - .NET Framework 4.8 compatibility tests
 - COM Interop verification
 - SaveAsText / LoadFromText round-trip tests
 
-### Integration Tests (Access-ACE-MCP-Tests-Net10.csproj)
+### Integration Tests (Access-DevTool-MCP-Tests-Net10.csproj)
 - Full MCP protocol validation
 - End-to-end database operations
 - Multiple tool invocation sequences

@@ -1,4 +1,4 @@
-# Access-ACE-MCP: Quick Start Guide
+# Access-DevTool-MCP: Quick Start Guide
 
 **TL;DR:** Build the project, configure Claude Code, back up your database, then ask Claude to automate your Access database.
 
@@ -8,12 +8,12 @@
 ```bash
 # In Visual Studio
 Build > Build Solution
-# Then publish the main Access-ACE-MCP project
+# Then publish the main Access-DevTool-MCP project
 ```
 
 Published executable location:
 ```
-C:\GitHub\Access-ACE-MCP\Published\Access-ACE-MCP.exe
+C:\GitHub\Access-DevTool-MCP\Published\Access-DevTool-MCP.exe
 ```
 
 ### 2. Configure Claude Code
@@ -21,8 +21,8 @@ C:\GitHub\Access-ACE-MCP\Published\Access-ACE-MCP.exe
 **Add to `~/.claude/settings.json` (CLI):**
 ```json
 "mcpServers": {
-  "access-ace": {
-    "command": "C:\\GitHub\\Access-ACE-MCP\\Published\\Access-ACE-MCP.exe",
+  "Access-DevTool": {
+    "command": "C:\\GitHub\\Access-DevTool-MCP\\Published\\Access-DevTool-MCP.exe",
     "args": []
   }
 }
