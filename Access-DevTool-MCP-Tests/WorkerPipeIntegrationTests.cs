@@ -74,10 +74,15 @@ public class WorkerPipeIntegrationTests
             Path.Combine(dir, "Access-DevTool-Agent.exe"),
         };
 
-        var found = candidates.FirstOrDefault(File.Exists);
+        var found = candidates
+            .Where(File.Exists)
+            .Select(path => new FileInfo(path))
+            .OrderByDescending(info => info.LastWriteTimeUtc)
+            .FirstOrDefault();
+
         if (found == null)
             Assert.Inconclusive("Access-DevTool-Agent.exe not found. Build Access-DevTool-Agent first.");
-        return found!;
+        return found!.FullName;
     }
 
     private sealed class WorkerFixture : IAsyncDisposable
@@ -288,6 +293,52 @@ public class WorkerPipeIntegrationTests
         var reportData = r.GetProperty("report_data").GetString() ?? "";
         StringAssert.Contains(reportData, "Begin Report",
             "Exported report text must contain 'Begin Report' header");
+    }
+
+    [TestMethod]
+    public async Task ExportDatabaseObjects_SpecificSubset_ExportsRequestedItemsOnly()
+    {
+        var formsResult = AssertSuccess(await Channel.CallAsync("get_forms"));
+        var reportsResult = AssertSuccess(await Channel.CallAsync("get_reports"));
+        var queriesResult = AssertSuccess(await Channel.CallAsync("get_queries"));
+        var modulesResult = AssertSuccess(await Channel.CallAsync("get_modules"));
+
+        if (formsResult.GetProperty("forms").GetArrayLength() == 0 ||
+            reportsResult.GetProperty("reports").GetArrayLength() == 0 ||
+            queriesResult.GetProperty("queries").GetArrayLength() == 0 ||
+            modulesResult.GetProperty("modules").GetArrayLength() == 0)
+        {
+            Assert.Inconclusive("Test database must contain at least one form/report/query/module");
+        }
+
+        var formName = formsResult.GetProperty("forms")[0].GetProperty("Name").GetString()!;
+        var reportName = reportsResult.GetProperty("reports")[0].GetProperty("Name").GetString()!;
+        var queryName = queriesResult.GetProperty("queries")[0].GetProperty("Name").GetString()!;
+        var moduleName = modulesResult.GetProperty("modules")[0].GetProperty("Name").GetString()!;
+
+        var objectTypes = new
+        {
+            forms = new[] { formName },
+            reports = new[] { reportName },
+            queries = new[] { queryName },
+            modules = new[] { moduleName }
+        };
+
+        var r = AssertSuccess(await Channel.CallAsync("export_database_objects", new { object_types = objectTypes }));
+
+        Assert.IsTrue(r.TryGetProperty("exported_objects", out var exported));
+        Assert.AreEqual(JsonValueKind.Array, exported.ValueKind);
+
+        var exportedList = exported.EnumerateArray().ToList();
+        Assert.IsTrue(exportedList.Count > 0, "Expected at least one exported object");
+        Assert.IsTrue(exportedList.Count <= 4, "Subset export should not include more than requested objects");
+
+        Assert.IsTrue(exportedList.Any(e => e.GetProperty("type").GetString() == "form" && e.GetProperty("name").GetString() == formName));
+        Assert.IsTrue(exportedList.Any(e => e.GetProperty("type").GetString() == "report" && e.GetProperty("name").GetString() == reportName));
+        Assert.IsTrue(exportedList.Any(e => e.GetProperty("type").GetString() == "query" && e.GetProperty("name").GetString() == queryName));
+        Assert.IsTrue(exportedList.Any(e => e.GetProperty("type").GetString() == "module" && e.GetProperty("name").GetString() == moduleName));
+
+        Assert.IsTrue(exportedList.All(e => e.TryGetProperty("code", out _)), "Each exported item should include code");
     }
 
     // ── Error propagation through the pipe ───────────────────────────────────

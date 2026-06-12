@@ -32,8 +32,7 @@ If anything goes wrong during Claude's modifications, you'll have your original 
 
 ### Prerequisites
 - **Windows operating system** (this tool is Windows-only)
-- **32-bit Microsoft Access** (Office 2016 SP1+, 2019, 2021, or Microsoft 365)
-  - **IMPORTANT:** 64-bit Access is **NOT supported**. If you have 64-bit Office installed, you must install the 32-bit version side-by-side
+- **Microsoft Access** (Office 2016 SP1+, 2019, 2021, or Microsoft 365) - 32-bit or 64-bit
 - **.NET Runtime** (the published executable handles this automatically with the runtime config)
 
 ### Checking Your Access Installation
@@ -43,8 +42,6 @@ To verify which version of Access you have:
 1. Open Microsoft Access
 2. Go to **File > Account** (or Help > About Microsoft Access in older versions)
 3. Look for "64-bit" or "32-bit" in the version information
-
-**If you see "64-bit":** You need to install the 32-bit version of Office/Access alongside your current installation.
 
 ---
 
@@ -152,7 +149,7 @@ You don't need to pre-configure the server. In any Claude conversation, you can 
 
 **What Claude will do:**
 1. Call `connect_access` with the database path
-2. Verify that 32-bit Access is installed
+2. Detect the installed Access bitness
 3. Launch the Access-DevTool-Agent worker process
 4. Call `get_forms` to retrieve the list of forms
 5. Return the results
@@ -286,15 +283,6 @@ The Access-DevTool-MCP server exposes the following tools to Claude:
 
 ## Troubleshooting
 
-### "64-bit Microsoft Access is installed but is not supported"
-
-**Cause:** You have 64-bit Access installed.
-
-**Solution:**
-1. Uninstall the 64-bit version of Microsoft Office
-2. Download and install the **32-bit version** of Microsoft Office/Access
-3. If you need both versions, you can install 32-bit Office/Access alongside your existing 64-bit setup (requires careful installation order)
-
 ### "Access-DevTool-Agent.exe not found"
 
 **Cause:** The Published folder is missing the agent executable.
@@ -326,6 +314,16 @@ The Access-DevTool-MCP server exposes the following tools to Claude:
 2. Verify the file exists at that location
 3. Use absolute paths (e.g., `C:\Users\<UserName>\MyDatabase.accdb`)
 4. Ensure the file has read/write permissions
+
+### Provider SQLOLEDB.1 cannot be found (Error 3706)
+
+**Cause:** If your database uses the deprecated `SQLOLEDB.1` provider, you may see error message **"3706: Provider cannot be found. It may not be properly installed."** When this error dialog appears in Access, clicking OK will open Access, but if not acknowledged within a minute, the MCP server may time out.
+
+**Solution:** Install the supported provider **SQLNCLI11.1 (SQL Server Native Client 11.0)** from Microsoft:
+1. Download SQL Server Native Client 11.0 from: https://www.microsoft.com/en-us/download/details.aspx?id=50402
+2. Install the package on your system
+3. Restart Access and your MCP server
+4. Alternatively, update your connection string to use a newer provider like `MSOLEDBSQL` instead of `SQLOLEDB.1`
 
 ### Database becomes corrupted or locked
 

@@ -494,12 +494,147 @@ namespace AccessDevToolAgent
 
         public string ExportReportToText(string reportName)
         {
-            return ExportObjectToText(3, reportName); // 3 = acReport
+           return ExportObjectToText(3, reportName); // 3 = acReport
         }
 
         public void ImportReportFromText(string reportName, string reportData)
         {
-            ImportObjectFromText(3, reportName, reportData); // 3 = acReport
+           ImportObjectFromText(3, reportName, reportData); // 3 = acReport
+        }
+
+        public ExportDatabaseResult ExportDatabaseObjects(Dictionary<int, List<string>> objectTypes)
+        {
+           var result = new ExportDatabaseResult { Success = true, ExportedObjects = new List<ExportedObjectInfo>() };
+           var app = EnsureApp();
+
+           // Object type mappings: 2=acForm, 3=acReport, 1=acQuery, 5=acModule
+           var typeNames = new Dictionary<int, string>
+           {
+               { 2, "form" },
+               { 3, "report" },
+               { 1, "query" },
+               { 5, "module" }
+           };
+
+           foreach (var typeEntry in objectTypes)
+           {
+               int objectType = typeEntry.Key;
+               List<string> specificNames = typeEntry.Value;
+               string typeName = typeNames.ContainsKey(objectType) ? typeNames[objectType] : "unknown";
+
+               dynamic allObjects = null;
+               try
+               {
+                   switch (objectType)
+                   {
+                       case 2: // acForm
+                           allObjects = app.CurrentProject.AllForms;
+                           break;
+                       case 3: // acReport
+                           allObjects = app.CurrentProject.AllReports;
+                           break;
+                       case 1: // acQuery
+                           dynamic db = app.CurrentDb();
+                           dynamic defs = db.QueryDefs;
+                           int queryCount = (int)defs.Count;
+
+                           for (int i = 0; i < queryCount; i++)
+                           {
+                               dynamic qd = null;
+                               try { qd = defs.Item(i); }
+                               catch { try { qd = defs.Item(i + 1); } catch { } }
+                               if (qd == null) continue;
+
+                               string qName = (string)qd.Name;
+                               if (!qName.StartsWith("~"))
+                               {
+                                   if (specificNames.Count == 0 || specificNames.Contains(qName, StringComparer.OrdinalIgnoreCase))
+                                   {
+                                       string sql = "";
+                                       try { sql = (string)qd.SQL; } catch { }
+                                       result.ExportedObjects.Add(new ExportedObjectInfo
+                                       {
+                                           Type = typeName,
+                                           Name = qName,
+                                           Code = sql
+                                       });
+                                   }
+                               }
+
+                               if (Marshal.IsComObject(qd))
+                               {
+                                   try { Marshal.ReleaseComObject(qd); } catch { }
+                               }
+                           }
+                           Marshal.ReleaseComObject(defs);
+                           Marshal.ReleaseComObject(db);
+                           continue;
+
+                       case 5: // acModule
+                           allObjects = app.CurrentProject.AllModules;
+                           break;
+                       default:
+                           result.Errors.Add($"Unsupported object type: {objectType}");
+                           continue;
+                   }
+               }
+               catch (Exception ex)
+               {
+                   result.Errors.Add($"Failed to get {typeName}s: {ex.Message}");
+                   continue;
+               }
+
+               if (allObjects == null)
+               {
+                   result.Errors.Add($"Could not access {typeName}s");
+                   continue;
+               }
+
+               int count = (int)allObjects.Count;
+               for (int i = 0; i < count; i++)
+               {
+                   dynamic obj = null;
+                   try { obj = allObjects.Item(i); }
+                   catch { try { obj = allObjects.Item(i + 1); } catch { } }
+                   if (obj == null) continue;
+
+                   string objName = "";
+                   try { objName = (string)obj.Name; } catch { continue; }
+
+                   if (specificNames.Count > 0 && !specificNames.Any(n => string.Equals(n, objName, StringComparison.OrdinalIgnoreCase)))
+                       continue;
+
+                   string exportedCode = "";
+                   try
+                   {
+                       exportedCode = ExportObjectToText(objectType, objName);
+                   }
+                   catch (Exception ex)
+                   {
+                       result.Errors.Add($"Failed to export {typeName} '{objName}': {ex.Message}");
+                       continue;
+                   }
+
+                   result.ExportedObjects.Add(new ExportedObjectInfo
+                   {
+                       Type = typeName,
+                       Name = objName,
+                       Code = exportedCode
+                   });
+               }
+           }
+
+           if (result.Errors.Count > 0)
+           {
+               result.Success = false;
+               result.Message = "Some exports failed";
+           }
+           else
+           {
+               result.Message = "Export completed successfully";
+           }
+
+           return result;
         }
 
         // ── Destructive ───────────────────────────────────────────────────────
@@ -1026,6 +1161,21 @@ namespace AccessDevToolAgent
     {
         public string Name     { get; set; } = "";
         public bool   IsLoaded { get; set; }
+    }
+
+    public class ExportedObjectInfo
+    {
+        public string Type { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Code { get; set; } = "";
+    }
+
+    public class ExportDatabaseResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = "";
+        public List<ExportedObjectInfo> ExportedObjects { get; set; } = new List<ExportedObjectInfo>();
+        public List<string> Errors { get; set; } = new List<string>();
     }
 
     public class QueryInfo

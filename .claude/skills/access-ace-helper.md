@@ -146,6 +146,129 @@ get_table_definitions()
 disconnect_access()
 ```
 
+## Database Backup & Export
+
+### Overview
+The `export_database_objects` tool exports forms, reports, queries, and modules as text files. **Token-efficient pattern**: The server returns JSON with all object code; Claude writes the files client-side into a structured folder.
+
+### Full Database Backup Workflow
+
+**User prompt example:**
+```
+Back up my entire database to a structured folder:
+- Database: C:\MyProject\Database.accdb
+- Output: C:\MyProject\Database_Backup
+```
+
+**Your workflow:**
+1. Connect to the database
+2. Call `export_database_objects` with all types:
+   ```json
+   {
+     "object_types": {
+       "forms": [],
+       "reports": [],
+       "queries": [],
+       "modules": []
+     }
+   }
+   ```
+   Empty arrays mean "export all objects of this type"
+3. Parse the response `exported_objects` array (each has `type`, `name`, `code`)
+4. Create folder structure:
+   ```
+   Database_Backup/
+   ├── forms/
+   ├── reports/
+   ├── queries/
+   └── modules/
+   ```
+5. Write each object to its subfolder using appropriate file extension:
+   - **Forms**: `forms/{name}.txt` (SaveAsText format)
+   - **Reports**: `reports/{name}.txt` (SaveAsText format)
+   - **Queries**: `queries/{name}.sql` (SQL text)
+   - **Modules**: `modules/{name}.bas` (VBA code)
+6. Create `BACKUP_SUMMARY.txt` with counts, timestamp, and status
+7. Disconnect
+
+**Example code you might write:**
+```
+foreach object in exported_objects:
+  folder = "Database_Backup/" + object.type + "s/"
+  extension = ".txt" if object.type in ["form", "report"] else (".sql" if object.type == "query" else ".bas")
+  write_file(folder + object.name + extension, object.code)
+```
+
+### Selective Backup Workflow
+
+**User prompt example:**
+```
+Export only these objects:
+- Forms: frmMain, frmCustomer
+- Modules: basUtility
+- Output: C:\Backups\Selective
+```
+
+**Your workflow:**
+1. Connect to database
+2. Call `export_database_objects` with specific names:
+   ```json
+   {
+     "object_types": {
+       "forms": ["frmMain", "frmCustomer"],
+       "modules": ["basUtility"]
+     }
+   }
+   ```
+3. Create only the needed subfolders (`forms/`, `modules/`)
+4. Write only the requested objects
+5. Disconnect
+
+### Safety & Best Practices
+
+- **Always disconnect** after backup completes
+- **Verify object counts** in response match expectations
+- **Check `errors` array** in response; some objects may fail to export (corrupted, locked)
+- **Use short output paths** to avoid Windows 260-char path limit (Access object names can be 64+ chars)
+- **For version control**: After writing files, user can `git add . && git commit -m "Database backup YYYY-MM-DD"`
+
+### Token Efficiency
+
+✅ **Do this** (recommended):
+- Call `export_database_objects` once
+- Parse JSON response
+- Write files client-side
+
+❌ **Don't do this** (wasteful):
+- Call `export_form`, `export_report`, etc. individually for each object
+- Make hundreds of separate tool calls
+
+### Full Example Session
+
+```
+User: "Back up C:\Projects\Invoicing.accdb to C:\Backups\Invoicing_Backup"
+
+You:
+1. connect_access("C:\Projects\Invoicing.accdb")
+2. result = export_database_objects({"forms":[],"reports":[],"queries":[],"modules":[]})
+3. Parse result.exported_objects (e.g., 23 forms, 8 reports, 15 queries, 5 modules)
+4. Create folders: C:\Backups\Invoicing_Backup\forms\, reports\, queries\, modules\
+5. Write 51 files with appropriate extensions
+6. Create BACKUP_SUMMARY.txt:
+   ---
+   Backup Date: 2025-05-12 14:30:00
+   Database: C:\Projects\Invoicing.accdb
+   Forms: 23 | Reports: 8 | Queries: 15 | Modules: 5
+   Total: 51 objects exported
+   ---
+7. disconnect_access()
+8. Report: "Backup complete. 51 objects exported to C:\Backups\Invoicing_Backup"
+```
+
+### Detailed Reference
+
+For complete examples, PowerShell scripts, restore workflows, and troubleshooting, see **`DATABASE_BACKUP_GUIDE.md`** in the repository root.
+
 ## Object Type Codes
 
 When using generic tools, use these codes:
@@ -160,7 +283,6 @@ When using generic tools, use these codes:
 
 ## Limitations to Communicate
 
-- **32-bit only** - 64-bit Access not supported
 - **One database at a time** - Per MCP server instance
 - **Windows only** - Requires Windows and COM automation
 - **No datasheet editing** - Can't directly modify table data
@@ -170,14 +292,11 @@ When using generic tools, use these codes:
 
 ## Troubleshooting Guidance
 
-### "64-bit Access is installed..."
-→ User needs to install 32-bit Office/Access instead
-
 ### "Access-DevTool-Agent.exe not found"
 → Both executables must be in the same directory
 
 ### Connection timeout
-→ Check: Is 32-bit Access installed? Is the database file accessible and not corrupted?
+→ Check: Is Microsoft Access installed? Is the database file accessible and not corrupted?
 
 ### Dialog box appeared
 → Ask user to look at the Access window and click the appropriate button

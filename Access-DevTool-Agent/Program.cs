@@ -89,10 +89,7 @@ namespace AccessDevToolAgent
                 catch (Exception ex) { Console.Error.WriteLine($"Auto-connect failed: {ex.Message}"); }
             }
 
-            if (accessBitness != "x86")
-            {
-                Console.Error.WriteLine("This MCP server was compiled as x86 to automate Access, but Access bitness is not x86. Detected Access bitness: " + accessBitness);
-            }
+            Console.Error.WriteLine($"Detected Access bitness: {accessBitness}");
 
             _providerWarnings = CheckProviderRegistrations();
             foreach (var w in _providerWarnings)
@@ -160,6 +157,7 @@ namespace AccessDevToolAgent
             {
             T("connect_access",           "Connect to an Access database via COM automation (required before all other tools)",
               P("database_path", "Full path to the .accdb or .mdb file")),
+            T("get_access_bitness",       "Get the bitness of the local Microsoft Access installation without opening Access"),
             T("disconnect_access",        "Close the COM connection and quit the Access instance"),
             T("is_connected",             "Check whether a database is currently connected"),
             T("get_application_info",     "Get basic Access application metadata (name, version, db path, visibility)"),
@@ -220,6 +218,8 @@ namespace AccessDevToolAgent
               P("form_name", "Form name")),
             T("delete_report",            "Permanently delete a report",
               P("report_name", "Report name")),
+            T("export_database_objects",   "Export forms, reports, queries, and modules (any combination) for backup",
+              P("object_types", "JSON object with keys forms/reports/queries/modules. Each value is [] for all or [\"Name1\",\"Name2\"] for specific objects")),
             }
         };
 
@@ -240,6 +240,9 @@ namespace AccessDevToolAgent
                             return new { success = true, message = "Connected", connected = true, warnings = _providerWarnings.ToArray() };
                         return (object)new { success = true, message = "Connected", connected = true };
                     });
+                    break;
+                case "get_access_bitness":
+                    result = new { success = true, bitness = GetAccessBitness() };
                     break;
                 case "disconnect_access":
                     result = Wrap(() => { _svc.Disconnect(); return new { success = true, message = "Disconnected" }; });
@@ -343,6 +346,52 @@ namespace AccessDevToolAgent
                 case "delete_report":
                     result = Wrap(() => { _svc.DeleteReport(S(args, "report_name")); return new { success = true, message = "Deleted" }; });
                     break;
+                case "export_database_objects":
+                    {
+                        JsonElement objectTypesEl;
+                        if (!args.TryGetProperty("object_types", out objectTypesEl) || objectTypesEl.ValueKind == JsonValueKind.Null || objectTypesEl.ValueKind == JsonValueKind.Undefined)
+                        {
+                            result = new { success = false, error = "Required parameter 'object_types' missing" };
+                            break;
+                        }
+
+                        var objectTypesDict = new Dictionary<int, List<string>>();
+
+                        JsonElement formsArg;
+                        if (objectTypesEl.TryGetProperty("forms", out formsArg) && formsArg.ValueKind != JsonValueKind.Null && formsArg.ValueKind != JsonValueKind.Undefined)
+                            objectTypesDict[2] = JsonToList(formsArg); // 2 = acForm
+
+                        JsonElement reportsArg;
+                        if (objectTypesEl.TryGetProperty("reports", out reportsArg) && reportsArg.ValueKind != JsonValueKind.Null && reportsArg.ValueKind != JsonValueKind.Undefined)
+                            objectTypesDict[3] = JsonToList(reportsArg); // 3 = acReport
+
+                        JsonElement queriesArg;
+                        if (objectTypesEl.TryGetProperty("queries", out queriesArg) && queriesArg.ValueKind != JsonValueKind.Null && queriesArg.ValueKind != JsonValueKind.Undefined)
+                            objectTypesDict[1] = JsonToList(queriesArg); // 1 = acQuery
+
+                        JsonElement modulesArg;
+                        if (objectTypesEl.TryGetProperty("modules", out modulesArg) && modulesArg.ValueKind != JsonValueKind.Null && modulesArg.ValueKind != JsonValueKind.Undefined)
+                            objectTypesDict[5] = JsonToList(modulesArg); // 5 = acModule
+
+                        if (objectTypesDict.Count == 0)
+                        {
+                            result = new { success = false, error = "At least one object type must be specified (forms, reports, queries, modules)." };
+                            break;
+                        }
+
+                        result = Wrap(() =>
+                        {
+                            var exportResult = _svc.ExportDatabaseObjects(objectTypesDict);
+                            return new
+                            {
+                                success = exportResult.Success,
+                                message = exportResult.Message,
+                                exported_objects = exportResult.ExportedObjects.ConvertAll(o => new { type = o.Type, name = o.Name, code = o.Code }),
+                                errors = exportResult.Errors
+                            };
+                        });
+                    }
+                    break;
                 default:
                     result = (object)new { success = false, error = $"Unknown tool: {name}" };
                     break;
@@ -363,17 +412,11 @@ namespace AccessDevToolAgent
         {
             if (string.Equals(accessBitness, "x86", StringComparison.OrdinalIgnoreCase))
             {
-                if (Environment.Is64BitProcess)
-                    return "Access is x86 but this process is x64. Run the x86 build so only the 32-bit Access Database Engine is used.";
-
                 if (!HasAceProvider(RegistryView.Registry32))
                     return "Access is x86, but the 32-bit Access Database Engine (Microsoft.ACE.OLEDB.12.0/16.0) is not installed.";
 
                 return null;
             }
-
-            if (string.Equals(accessBitness, "x64", StringComparison.OrdinalIgnoreCase))
-                return "Detected x64 Access. This MCP server is x86 and will not attempt to use the 64-bit Access Database Engine.";
 
             return null;
         }
@@ -502,6 +545,35 @@ namespace AccessDevToolAgent
             return ToObjectArray(arr);
         }
 
+        static List<string> JsonToList(JsonElement el)
+        {
+            if (el.ValueKind == JsonValueKind.Array)
+            {
+                var list = new List<string>();
+                foreach (var item in el.EnumerateArray())
+                    list.Add(item.GetString() ?? "");
+                return list;
+            }
+
+            if (el.ValueKind == JsonValueKind.String)
+            {
+                var text = el.GetString();
+                if (string.IsNullOrWhiteSpace(text)) return new List<string>();
+                using (var doc = JsonDocument.Parse(text))
+                {
+                    if (doc.RootElement.ValueKind != JsonValueKind.Array)
+                        throw new ArgumentException("Object type filter value must be a JSON array or array string");
+
+                    var list = new List<string>();
+                    foreach (var item in doc.RootElement.EnumerateArray())
+                        list.Add(item.GetString() ?? "");
+                    return list;
+                }
+            }
+
+            throw new ArgumentException("Object type filter value must be an array or stringified JSON array");
+        }
+
         static object[] ToObjectArray(JsonElement arr)
         {
             var list = new List<object>();
@@ -543,7 +615,9 @@ namespace AccessDevToolAgent
                 var outlookKey = hklm64.OpenSubKey($@"SOFTWARE\Microsoft\Office\{officeVersion}\Outlook");
                 if (outlookKey != null)
                 {
-                    return outlookKey.GetValue("Bitness")?.ToString() ?? string.Empty; // Returns "x86" or "x64"
+                    var bitness = outlookKey.GetValue("Bitness")?.ToString();
+                    if (!string.IsNullOrWhiteSpace(bitness))
+                        return bitness; // Returns "x86" or "x64"
                 }
 
                 var foundAccessKey = false;

@@ -28,13 +28,18 @@ public class WorkerPipeProtocolTests
             Path.GetFullPath(Path.Combine(dir, "..", "..", "..", "..", "Access-DevTool-Agent", "bin", "Release", "Access-DevTool-Agent.exe")),
         };
 
-        var found = candidates.FirstOrDefault(File.Exists);
+        var found = candidates
+            .Where(File.Exists)
+            .Select(path => new FileInfo(path))
+            .OrderByDescending(info => info.LastWriteTimeUtc)
+            .FirstOrDefault();
+
         if (found == null)
             Assert.Inconclusive(
                 "Access-DevTool-Agent.exe not found. Build the Access-DevTool-Agent project first. " +
                 $"Searched: {string.Join(", ", candidates)}");
 
-        return found!;
+        return found!.FullName;
     }
 
     private sealed class WorkerFixture : IAsyncDisposable
@@ -95,6 +100,25 @@ public class WorkerPipeProtocolTests
 
         Assert.IsTrue(result.GetProperty("success").GetBoolean());
         Assert.IsFalse(result.GetProperty("connected").GetBoolean());
+    }
+
+    [TestMethod]
+    public async Task GetAccessBitness_WhenNotConnected_ReturnsBitnessWithoutConnecting()
+    {
+        await using var w = WorkerFixture.Start(FindWorkerExe());
+
+        var bitnessResult = ParseResult(await w.Channel.CallAsync("get_access_bitness"));
+
+        Assert.IsTrue(bitnessResult.GetProperty("success").GetBoolean());
+        var bitness = bitnessResult.GetProperty("bitness").GetString() ?? "";
+        Assert.IsFalse(string.IsNullOrWhiteSpace(bitness), "Bitness should not be empty");
+        Assert.IsTrue(bitness == "x86" || bitness == "x64" || bitness == "Not Found",
+            "Unexpected bitness: " + bitness);
+
+        var connectedResult = ParseResult(await w.Channel.CallAsync("is_connected"));
+        Assert.IsTrue(connectedResult.GetProperty("success").GetBoolean());
+        Assert.IsFalse(connectedResult.GetProperty("connected").GetBoolean(),
+            "Querying bitness must not connect to Access");
     }
 
     [TestMethod]
@@ -209,5 +233,17 @@ public class WorkerPipeProtocolTests
         Assert.AreEqual(
             r1.GetProperty("connected").GetBoolean(),
             r2.GetProperty("connected").GetBoolean());
+    }
+
+    [TestMethod]
+    public async Task ExportDatabaseObjects_MissingObjectTypes_ReturnsValidationError()
+    {
+        await using var w = WorkerFixture.Start(FindWorkerExe());
+
+        var result = ParseResult(await w.Channel.CallAsync("export_database_objects", new { }));
+
+        Assert.IsFalse(result.GetProperty("success").GetBoolean());
+        Assert.IsTrue(result.TryGetProperty("error", out var err));
+        StringAssert.Contains(err.GetString() ?? "", "object_types");
     }
 }

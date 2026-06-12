@@ -448,6 +448,44 @@ namespace AccessDevToolAgentTests
         }
 
         [TestMethod]
+        public void ExportDatabaseObjects_SpecificSubset_ExportsOnlyRequestedItems()
+        {
+            RunInSta(() =>
+            {
+                using (var svc = Connect())
+                {
+                    var forms = svc.GetForms();
+                    var reports = svc.GetReports();
+                    var queries = svc.GetQueries();
+                    var modules = svc.GetModules();
+
+                    if (forms.Count == 0 || reports.Count == 0 || queries.Count == 0 || modules.Count == 0)
+                        Assert.Inconclusive("Test database must contain at least one form/report/query/module");
+
+                    var request = new System.Collections.Generic.Dictionary<int, System.Collections.Generic.List<string>>
+                    {
+                        [2] = new System.Collections.Generic.List<string> { forms[0].Name },
+                        [3] = new System.Collections.Generic.List<string> { reports[0].Name },
+                        [1] = new System.Collections.Generic.List<string> { queries[0].Name },
+                        [5] = new System.Collections.Generic.List<string> { modules[0].Name }
+                    };
+
+                    var result = svc.ExportDatabaseObjects(request);
+
+                    Assert.IsNotNull(result);
+                    Assert.IsTrue(result.ExportedObjects.Count > 0, "Expected at least one exported object");
+                    Assert.IsTrue(result.ExportedObjects.Count <= 4, "Subset export should not include more than requested objects");
+                    Assert.IsTrue(result.ExportedObjects.Any(o => o.Type == "form" && o.Name == forms[0].Name));
+                    Assert.IsTrue(result.ExportedObjects.Any(o => o.Type == "report" && o.Name == reports[0].Name));
+                    Assert.IsTrue(result.ExportedObjects.Any(o => o.Type == "query" && o.Name == queries[0].Name));
+                    Assert.IsTrue(result.ExportedObjects.Any(o => o.Type == "module" && o.Name == modules[0].Name));
+                    Assert.IsTrue(result.ExportedObjects.All(o => !string.IsNullOrWhiteSpace(o.Name)));
+                    Assert.IsTrue(result.ExportedObjects.All(o => o.Code != null));
+                }
+            });
+        }
+
+        [TestMethod]
         public void GetAccessBitness_ReturnsString_ViaReflection()
         {
             RunInSta(() =>

@@ -21,7 +21,7 @@ public class AccessToolsRegistrationTests
 
     private static readonly string[] ExpectedToolNames =
     [
-        "connect_access", "disconnect_access", "is_connected",
+        "connect_access", "get_access_bitness", "disconnect_access", "is_connected",
         "get_application_info", "get_option", "set_option", "eval_expression",
         "run_procedure", "run_command",
         "invoke_application_method", "invoke_docmd_method",
@@ -33,7 +33,7 @@ public class AccessToolsRegistrationTests
         "get_form_controls", "get_control_properties", "set_control_property",
         "export_form_to_text", "import_form_from_text",
         "export_report_to_text", "import_report_from_text",
-        "delete_form", "delete_report",
+        "delete_form", "delete_report", "export_database_objects",
         "get_table_definitions", "get_table_definition",
         "get_objects_by_type", "compile_vba_with_errors", "get_database_summary",
     ];
@@ -41,10 +41,10 @@ public class AccessToolsRegistrationTests
     // ── Count & completeness ──────────────────────────────────────────────────
 
     [TestMethod]
-    public void ToolCount_Is40()
+    public void ToolCount_Is42()
     {
-        Assert.AreEqual(40, ToolMethods.Length,
-            $"Expected 40 tools. Found: {string.Join(", ", ToolMethods.Select(m => m.Name))}");
+        Assert.AreEqual(42, ToolMethods.Length,
+            $"Expected 42 tools. Found: {string.Join(", ", ToolMethods.Select(m => m.Name))}");
     }
 
     [TestMethod]

@@ -63,7 +63,7 @@ That's it! Claude will handle the connection and return the results.
 
 ## Checklist
 
-- [ ] 32-bit Microsoft Access is installed
+- [ ] Microsoft Access is installed (32-bit or 64-bit)
 - [ ] Solution is built in Visual Studio
 - [ ] Published folder exists with both executables
 - [ ] MCP server is configured in Claude Code settings
@@ -76,7 +76,6 @@ That's it! Claude will handle the connection and return the results.
 
 | Problem | Fix |
 |---------|-----|
-| "64-bit Access not supported" | Install 32-bit Office/Access |
 | "Agent.exe not found" | Rebuild solution & republish |
 | "Connection timeout" | Verify database path is correct |
 | "Database corrupted" | Restore from backup immediately |

@@ -17,18 +17,20 @@ public sealed class AccessTools(PipeChannel channel)
     public Task<string> ConnectAccess(
         [Description("Full path to the .accdb or .mdb file")] string database_path)
     {
-        var bitness = GetAccessBitness();
-        if (string.Equals(bitness, "x64", StringComparison.OrdinalIgnoreCase))
-            return Task.FromResult(JsonSerializer.Serialize(new
-            {
-                success = false,
-                error = "64-bit Microsoft Access is installed but is not supported. " +
-                        "This MCP server requires 32-bit (x86) Access. " +
-                        "Please install the 32-bit version of Microsoft Office/Access."
-            }));
+        var bitness = QueryInstalledAccessBitness();
+        Console.Error.WriteLine($"Detected Access bitness: {bitness}");
 
         return channel.CallAsync("connect_access", new { database_path });
     }
+
+    [McpServerTool(Name = "get_access_bitness")]
+    [Description("Get the bitness of the local Microsoft Access installation without opening Access")]
+    public Task<string> GetAccessBitness()
+        => Task.FromResult(JsonSerializer.Serialize(new
+        {
+            success = true,
+            bitness = QueryInstalledAccessBitness()
+        }));
 
     /// <summary>
     /// Detects the bitness of the installed Microsoft Access by inspecting the registry.
@@ -36,7 +38,7 @@ public sealed class AccessTools(PipeChannel channel)
     /// Returns "x86", "x64", or "Not Found".
     /// </summary>
     [SupportedOSPlatform("windows")]
-    private static string GetAccessBitness()
+    private static string QueryInstalledAccessBitness()
     {
         foreach (var version in new[] { "16.0", "15.0", "14.0" })
         {
@@ -305,6 +307,12 @@ public sealed class AccessTools(PipeChannel channel)
     public Task<string> DeleteReport(
         [Description("Report name")] string report_name)
         => channel.CallAsync("delete_report", new { report_name });
+
+    [McpServerTool(Name = "export_database_objects")]
+    [Description("Export forms, reports, queries, and modules (any combination) for backup")]
+    public Task<string> ExportDatabaseObjects(
+        [Description("JSON object with keys forms/reports/queries/modules. Each value can be [] for all or [\"Name1\",\"Name2\"] for specific objects")] string object_types)
+        => channel.CallAsync("export_database_objects", new { object_types = JsonDocument.Parse(object_types).RootElement });
 
     // ── New Interop Features ──────────────────────────────────────────────────────
 

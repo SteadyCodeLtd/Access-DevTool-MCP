@@ -48,7 +48,7 @@ Access-DevTool-MCP uses a **two-process architecture** to bridge Claude's .NET 1
 
 ### 1. Access-DevTool-MCP.exe (Main Server)
 **Language:** C# / .NET 10.0  
-**Platform:** Windows, x86 only  
+**Platform:** Windows  
 **Role:** MCP server entry point
 
 **Key Classes:**
@@ -59,13 +59,13 @@ Access-DevTool-MCP uses a **two-process architecture** to bridge Claude's .NET 1
 **Key Responsibilities:**
 - Listens on stdio for MCP requests from Claude
 - Spawns the Access-DevTool-Agent worker process with a unique pipe name
-- Detects installed Access bitness (32-bit vs 64-bit) and rejects x64
+- Detects installed Access bitness (32-bit vs 64-bit) and logs the result
 - Routes tool calls to the worker process via named pipes
 - Handles application lifecycle (startup, shutdown, error handling)
 
 ### 2. Access-DevTool-Agent.exe (COM Interop Worker)
 **Language:** C# / .NET 4.8  
-**Platform:** Windows, x86 only  
+**Platform:** Windows  
 **Role:** COM Interop layer with Microsoft Access
 
 **Key Responsibilities:**
@@ -273,10 +273,7 @@ Claude displays form list to user
 
 ## Access Bitness Detection
 
-Access-DevTool-MCP enforces **32-bit only** because:
-1. COM interop is simpler and more stable on 32-bit
-2. Both MCP server and agent are x86 (32-bit)
-3. Registry keys differ for 32-bit vs 64-bit Office
+Access-DevTool-MCP detects the installed Access bitness to provide appropriate feedback. Both 32-bit and 64-bit Access are supported.
 
 **Detection Logic (in AccessTools.cs):**
 1. Check Registry: `HKLM\SOFTWARE\Microsoft\Office\{version}\Outlook`
@@ -411,12 +408,11 @@ Published/
 
 ## Limitations & Known Issues
 
-1. **32-bit only** - No 64-bit Access support
-2. **Single connection** - One database at a time per instance
-3. **Windows only** - COM Interop is Windows-specific
-4. **No transaction support** - Each tool call is independent
-5. **Form in design mode** - open_form can lock form temporarily
-6. **VBA debugging** - No integrated debugger, code review recommended
+1. **Single connection** - One database at a time per instance
+2. **Windows only** - COM Interop is Windows-specific
+3. **No transaction support** - Each tool call is independent
+4. **Form in design mode** - open_form can lock form temporarily
+5. **VBA debugging** - No integrated debugger, code review recommended
 
 ---
 

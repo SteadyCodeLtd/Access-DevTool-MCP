@@ -8,7 +8,7 @@
     <AssemblyName>Access-DevTool-MCP</AssemblyName>
     <RootNamespace>AccessAceMcp</RootNamespace>
     <Deterministic>true</Deterministic>
-    <PlatformTarget>x86</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>

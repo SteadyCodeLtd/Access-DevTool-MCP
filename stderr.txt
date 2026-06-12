@@ -1,0 +1,3 @@
+[Worker] Starting pipe server: bitness-debug-fff6a95b54db407db1e17f818ba34975
+[Worker] MCP client connected.
+[Worker] Pipe error: Pipe is broken.

@@ -5,6 +5,7 @@
   </Folder>
   <Folder Name="/MDFiles/">
     <File Path="ARCHITECTURE.md" />
+    <File Path="DATABASE_BACKUP_GUIDE.md" />
     <File Path="MCP_SETUP_GUIDE.md" />
     <File Path="QUICK_START.md" />
     <File Path="README.md" />

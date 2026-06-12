@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![.NET Version](https://img.shields.io/badge/.NET-10.0-blue)](https://dotnet.microsoft.com/)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2032--bit-blue)](https://www.microsoft.com/)
+[![Platform](https://img.shields.io/badge/Platform-Windows-blue)](https://www.microsoft.com/)
 
 **Access-DevTool-MCP** is a Model Context Protocol (MCP) server that enables Claude AI to interact with Microsoft Access databases through COM Interop automation. Modify forms and reports, modify and execute VBA code, and manage database objects programmatically.
 
@@ -28,8 +28,7 @@
 
 ### System
 - **Windows Operating System** (Windows 10 or later recommended)
-- **32-bit Microsoft Access** (Office 2016 SP1+, 2019, 2021, or Microsoft 365)
-  - ⚠️ **64-bit Access is NOT supported**
+- **Microsoft Access** (Office 2016 SP1+, 2019, 2021, or Microsoft 365) - 32-bit or 64-bit
 - **.NET Runtime** (included with published builds)
 
 ### Software
@@ -247,19 +246,11 @@ Access-DevTool-MCP exposes 40+ tools for database automation:
 | **Application** | get_application_info, get_option, set_option, eval_expression |
 | **Execution** | run_procedure, run_command, invoke_application_method, invoke_docmd_method |
 | **Reports** | export_report_to_text, import_report_from_text, delete_report |
+| **Backup** | export_database_objects |
 
 See [MCP_SETUP_GUIDE.md](MCP_SETUP_GUIDE.md#available-tools) for complete tool documentation.
 
 ## Troubleshooting
-
-### "64-bit Microsoft Access is installed but is not supported"
-
-**Solution:** Install 32-bit Office/Access. 
-
-```bash
-# Check your Access version
-# File > Account > About Access button Look for "32-bit" or "64-bit"
-```
 
 ### "Access-DevTool-Agent.exe not found"
 
@@ -268,7 +259,7 @@ See [MCP_SETUP_GUIDE.md](MCP_SETUP_GUIDE.md#available-tools) for complete tool d
 ### Connection Timeout
 
 **Solution:** Verify:
-- 32-bit Access is installed
+- Microsoft Access is installed
 - Database file exists and is readable
 - Database file is not corrupted
 - You have read/write permissions on the file
@@ -312,7 +303,6 @@ For technical details, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Limitations
 
-- **32-bit only** - 64-bit Access not supported
 - **Single connection** - One database at a time per instance
 - **Windows only** - Requires Windows and COM Interop
 - **No datasheet operations** - Table data editing requires other tools
