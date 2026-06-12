@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/BackupVbaModule/">
+    <File Path="BackupVbaModule/ExportAllObjects.bas" />
+  </Folder>
   <Folder Name="/Claude/" />
   <Folder Name="/Claude/skills/">
     <File Path=".claude/skills/Access-DevTool-helper.md" />
@@ -10,9 +13,9 @@
     <File Path="QUICK_START.md" />
     <File Path="README.md" />
   </Folder>
-  <Project Path="Access-DevTool-MCP-Tests/Access-DevTool-MCP-Tests.csproj" Id="b2c3d4e5-f6a7-8901-bcde-f23456789012" />
   <Project Path="Access-DevTool-Agent-Tests/Access-DevTool-Agent-Tests.csproj" Id="54ec37d3-d298-43dd-8584-625ea2cd617f" />
-  <Project Path="Access-DevTool-MCP/Access-DevTool-MCP.csproj" Id="a1f2c3d4-e5f6-7890-abcd-ef1234567890" />
   <Project Path="Access-DevTool-Agent/Access-DevTool-Agent.csproj" Id="b861ba02-eedf-4d47-8c86-de535d1c8524" />
+  <Project Path="Access-DevTool-MCP-Tests/Access-DevTool-MCP-Tests.csproj" Id="b2c3d4e5-f6a7-8901-bcde-f23456789012" />
+  <Project Path="Access-DevTool-MCP/Access-DevTool-MCP.csproj" Id="a1f2c3d4-e5f6-7890-abcd-ef1234567890" />
 </Solution>
 
